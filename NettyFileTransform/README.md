@@ -1,0 +1,3 @@
+# Netty File Transform
+
+由于Netty比较适用于编写了客户端和服务端的情况，所以就简单写了个Netty File的demo，网盘的功能还是需要借助其他开源库去实现
