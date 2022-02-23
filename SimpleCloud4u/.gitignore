@@ -4,6 +4,12 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Configuration File ###
+/src/main/resources/application-dev.yml
+
+#### LOG FILE ###
+/log
+
 ### STS ###
 .apt_generated
 .classpath

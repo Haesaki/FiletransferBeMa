@@ -1,10 +1,10 @@
-package com.sin.fileserver;
+package com.sin.simplecloud4u;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class FileServerApplicationTests {
+class SimpleCloud4uApplicationTests {
 
     @Test
     void contextLoads() {

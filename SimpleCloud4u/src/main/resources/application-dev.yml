@@ -1,0 +1,6 @@
+spring:
+  redis:
+    host: redis-17652.c1.asia-northeast1-1.gce.cloud.redislabs.com
+    password: FpKdpslwly9eeVBre1qOA0vwa8jaXRrf
+    port: 17652
+    database: 0
