@@ -27,7 +27,7 @@ public class KeyOperationsTests {
     @Autowired RedisConnectionFactory connectionFactory;
 
     private RedisConnection connection;
-    private RedisSerializer<String> serializer = new StringRedisSerializer();
+    private final RedisSerializer<String> serializer = new StringRedisSerializer();
 
     @BeforeEach
     void setUp() {
@@ -44,7 +44,7 @@ public class KeyOperationsTests {
 
         generateRandomKeys(1000);
 
-        var keys = this.connection.keys(serializer.serialize(KEY_PATTERN));
+//        Keys keys = this.connection.keys(serializer.serialize(KEY_PATTERN));
     }
 
     /**
@@ -63,7 +63,7 @@ public class KeyOperationsTests {
 
     private void generateRandomKeys(int nrKeys) {
 
-        for (var i = 0; i < nrKeys; i++) {
+        for (int i = 0; i < nrKeys; i++) {
             this.connection.set((PREFIX + "-" + i).getBytes(), UUID.randomUUID().toString().getBytes());
         }
     }

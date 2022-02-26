@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Cloud 激活账户</title>
+</head>
+<body>
+<div>
+    <p>
+        <b th:text="${email}">localhost@localhost.com</b> 您好
+    </p>
+    <p>
+        &emsp;您正在注册Simple Cloud，这是一封激活邮件，请点击
+        <a href="#" th:href="${url}">
+            <span href="#" th:href="${url}">
+                http://www.baidu.com/activation_CODE
+            </span>
+        </a>
+        激活您的账户
+    </p>
+    <p>
+        谢谢！
+    </p>
+</div>
+</body>
+</html>

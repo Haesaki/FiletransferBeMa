@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sin.simplecloud4u.mapper.UserMapper">
+
+    <resultMap id="User" type="com.sin.simplecloud4u.model.entity.User">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="email" column="email" jdbcType="VARCHAR"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="role" column="role" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <!--添加语句的字段列表-->
+    <sql id="insertColumn">
+        <if test="id != null and id != ''">
+            id,
+        </if>
+        <if test="name != null and name != ''">
+            name,
+        </if>
+        <if test="email != null and email != ''">
+            email,
+        </if>
+        <if test="password != null and password != ''">
+            password,
+        </if>
+    </sql>
+
+    <!--添加语句的值列表-->
+    <sql id="insertValue">
+        <if test="id != null and id != ''">
+            #{id},
+        </if>
+        <if test="name != null and name != ''">
+            #{name},
+        </if>
+        <if test="email != null and email != ''">
+            #{email},
+        </if>
+        <if test="password != null and password != ''">
+            #{password},
+        </if>
+    </sql>
+
+    <insert id="createUser" keyProperty="id" useGeneratedKeys="true">
+        insert into user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <include refid="insertColumn"/>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <include refid="insertValue"/>
+        </trim>
+    </insert>
+    <delete id="deleteUserByName">
+        delete from user
+        <where>
+            name = #{name}
+        </where>
+    </delete>
+    <delete id="deleteUserById">
+        delete from user
+        <where>
+            id = #{id}
+        </where>
+    </delete>
+    <select id="selectUserById" resultType="com.sin.simplecloud4u.model.entity.User">
+        select *
+        from user
+        <where>
+            id = #{id}
+        </where>
+    </select>
+    <select id="selectUserByName" resultType="com.sin.simplecloud4u.model.entity.User">
+        select *
+        from user
+        <where>
+            name = #{name}
+        </where>
+    </select>
+    <select id="selectUserByEmail" resultType="com.sin.simplecloud4u.model.entity.User">
+        select *
+        from user
+        <where>
+            email = #{email}
+        </where>
+    </select>
+</mapper>
