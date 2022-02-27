@@ -26,9 +26,13 @@ public class User {
     public User(String name, String password) {
         this.name = name;
         this.password = password;
+    }
+
+    public boolean createDirectory(){
         File directory = new File(directoryPath);
         if (!directory.exists()) {
             directory.mkdirs();
         }
+        return true;
     }
 }

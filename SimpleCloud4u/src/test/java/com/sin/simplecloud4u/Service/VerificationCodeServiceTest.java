@@ -14,4 +14,9 @@ public class VerificationCodeServiceTest {
     public void mailTest(){
         mailClient.sendMail("laohapi@foxmail.com", "SendEmailTest", "This is a email test");
     }
+
+    @Test
+    public void sendCodeTest(){
+        mailClient.sendCode("laohapi@gmail.com", "123123");
+    }
 }

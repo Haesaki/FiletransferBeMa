@@ -3,11 +3,11 @@ package com.sin.simplecloud4u.service.interfa;
 import com.sin.simplecloud4u.model.entity.User;
 
 public interface UserService {
-    void createUser(User user);
+    boolean createUser(User user);
 
-    void deleteUserByName(String name);
+    boolean deleteUserByName(String name);
 
-    void deleteUserById(int id);
+    boolean deleteUserById(int id);
 
     User selectUserById(int id);
 

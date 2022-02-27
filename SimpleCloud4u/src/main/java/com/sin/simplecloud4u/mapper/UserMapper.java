@@ -5,11 +5,14 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface UserMapper {
-    void createUser(User user);
+    // return: 影响行数
+    int createUser(User user);
 
-    void deleteUserByName(String name);
+    // return: 影响行数
+    int deleteUserByName(String name);
 
-    void deleteUserById(int id);
+    // return: 影响行数
+    int deleteUserById(int id);
 
     User selectUserById(int id);
 

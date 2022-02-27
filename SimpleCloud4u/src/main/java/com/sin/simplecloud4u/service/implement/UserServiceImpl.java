@@ -18,18 +18,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void createUser(User user) {
-        userMapper.createUser(user);
+    public boolean createUser(User user) {
+        return userMapper.createUser(user) == 1;
     }
 
     @Override
-    public void deleteUserByName(String name) {
-        userMapper.deleteUserByName(name);
+    public boolean deleteUserByName(String name) {
+        return userMapper.deleteUserByName(name) == 1;
     }
 
     @Override
-    public void deleteUserById(int id) {
-        userMapper.deleteUserById(id);
+    public boolean deleteUserById(int id) {
+        return userMapper.deleteUserById(id) == 1;
     }
 
     @Override

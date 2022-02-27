@@ -1,19 +1,39 @@
 package com.sin.simplecloud4u.controller;
 
 import com.sin.simplecloud4u.model.entity.User;
+import com.sin.simplecloud4u.service.interfa.UserService;
+import com.sin.simplecloud4u.util.MailClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.time.Duration;
 import java.util.Map;
 
 @Controller
-public class LoginController {
-    private Logger logger = LoggerFactory.getLogger(LoginController.class);
+public class LoginController extends BaseController {
+    private final Logger logger = LoggerFactory.getLogger(LoginController.class);
+
+    private final UserService userService;
+
+    private final JavaMailSenderImpl mailSender;
+
+    private final StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    public LoginController(UserService userService, JavaMailSenderImpl mailSender, StringRedisTemplate redisTemplate) {
+        this.userService = userService;
+        this.mailSender = mailSender;
+        this.stringRedisTemplate = redisTemplate;
+    }
 
     /**
      * @return java.lang.String
@@ -34,15 +54,24 @@ public class LoginController {
 
     @PostMapping("/register")
     public String register(User user, String code, Map<String, Object> map, Model model) {
-        String verificationCode = (String) model.getAttribute(user.getEmail() + "_code");
-//        if (!code.equals(uCode)) {
-//            map.put("errorMsg", "验证码错误");
-//            return "index";
-//        }
-//        // 用户名去空格
-//        user.setUserName(user.getUserName().trim());
-//        // default avatar https://p.qpic.cn/qqconnect/0/app_101851241_1582451550/100?max-age=2592000&t=0
-//        user.setRole(false);
+        if (code == null || code.length() != 6)
+            return "index";
+        String verificationCode = (String) stringRedisTemplate.opsForValue().getAndDelete(user.getEmail() + "_c");
+        if (!code.equals(verificationCode)) {
+            map.put("errorMsg", "验证码错误");
+            return "index";
+        }
+        // 用户名去空格
+        if (user.getName() != null)
+            user.setName(user.getName().trim());
+        user.setRole(false);
+        // default avatar https://p.qpic.cn/qqconnect/0/app_101851241_1582451550/100?max-age=2592000&t=0
+        if (userService.createUser(user)) {
+
+        } else {
+            map.put("errorMsg", "服务器发生错误，注册失败");
+            return "index";
+        }
 //        if (userService.insert(user)) {
 //            FileStore store = FileStore.builder().userId(user.getUserId()).currentSize(0).build();
 //            fileStoreService.addFileStore(store);
@@ -54,8 +83,38 @@ public class LoginController {
 //            map.put("errorMsg", "服务器发生错误，注册失败");
 //            return "index";
 //        }
-//        session.removeAttribute(user.getEmail() + "_code");
-//        session.setAttribute("loginUser", user);
+        session.removeAttribute(user.getEmail() + "_code");
+        session.setAttribute("loginUser", user);
         return "redirect:/index";
+    }
+
+    /**
+     * @return void
+     * @Description 向注册邮箱发送验证码, 并验证邮箱是否已使用
+     * @Author xw
+     * @Date 19:32 2020/1/29
+     * @Param [userName, email, password]
+     **/
+    @ResponseBody
+    @RequestMapping("/sendCode")
+    public String sendCode(Model model, String userName, String email, String password, String invitationCode) {
+        if (!"simplecloud4u".equals(invitationCode))
+            return "exitEmail";
+        User userByEmail = userService.selectUserByEmail(email);
+        if (userByEmail != null) {
+            logger.error("发送验证码失败！邮箱已被注册！");
+            return "exitEmail";
+        }
+        logger.info(" 发送注册邮件到: " + email);
+        MailClient mailClient = new MailClient(mailSender);
+        String code = String.valueOf((int) ((Math.random() * 9 + 1) * 100000));
+        if (mailClient.sendCode(email, code)) {
+            // 把Code丢到Redis储存池子中进行存储
+            stringRedisTemplate.opsForValue().set(email + "_c", code, Duration.ofMinutes(10));
+            // 把Code丢到Model，发送给前端
+            model.addAttribute(email + "_code", code);
+            return "success";
+        }
+        return "exitEmail";
     }
 }

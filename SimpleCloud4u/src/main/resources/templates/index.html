@@ -41,8 +41,8 @@
                 <form method="post" action="register">
                     <div class="form-group">
                         <label>
-                            <input class="form-control userName" type="text" placeholder="用户名" required="required"
-                                   name="userName" autocomplete="off"
+                            <input class="form-control name" type="text" placeholder="用户名" required="required"
+                                   name="name" autocomplete="off"
                                    onkeyup="this.value=this.value.replace(/\s+/g,'')"/>
                         </label>
                     </div>
@@ -65,7 +65,7 @@
                         <label>
                             <input class="form-control invitationCode" id="invitationCode" type="text" placeholder="邀请码"
                                    required="required"
-                                   name="email" autocomplete="off" onkeyup="this.value=this.value.replace(/\s+/g,'')"/>
+                                   name="invitationCode" autocomplete="off"/>
                         </label>
                     </div>
 
@@ -158,14 +158,15 @@
     /*第一*/
     function sendMessage1() {
         curCount1 = count;
-        var email = $.trim($('#email').val());
-        var userName = $.trim($(".userName").val());
-        var password = $.trim($(".password").val());
+        let email = $.trim($('#email').val());
+        let name = $.trim($(".name").val());
+        let password = $.trim($(".password").val());
+        let invitationCode = $.trim($(".invitationCode").val());
         if (!emailReg.test(email)) {
             alert("邮箱格式错误！");
             return false;
         }
-        if (!userNameReg.test(userName)) {
+        if (!userNameReg.test(name)) {
             alert("用户名不可用！");
             return false;
         }
@@ -178,14 +179,14 @@
         $("#btnSendCode1").val(+curCount1 + "S 重发");
         InterValObj1 = window.setInterval(SetRemainTime1, 1000); //启动计时器，1秒执行一次
         //向后台发送处理数据
-        var email = $(".email").val();
+        email = $(".email").val();
         $.ajax({
             type: "GET",
             url: "sendCode",
             async: false,
             contentType: "application/json; charset=utf-8",
             dataType: "text",
-            data: {userName: userName, password: password, email: email},
+            data: {name: name, password: password, email: email, invitationCode: invitationCode},
             success: function (result) {
                 if (result === "exitEmail") {
                     window.clearInterval(InterValObj1);

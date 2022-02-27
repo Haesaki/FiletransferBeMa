@@ -18,7 +18,6 @@ public class MailClient {
 
     private JavaMailSender mailSender;
 
-    @Autowired
     public MailClient(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
@@ -26,8 +25,40 @@ public class MailClient {
     @Value("${spring.mail.username}")
     private String fromWho;
 
-    public void sendMail(String toWho, String subject, String content) {
-        LOGGER.info(new Date().toString() + " to: " + toWho + ",subject: " + subject);
+    public boolean sendCode(String toWho, String code) {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+        try {
+            helper.setSubject("Simple Cloud - 邮箱验证");
+            helper.setText(
+                    "<!DOCTYPE html>\n" +
+                            "<html>\n" +
+                            "  <head>\n" +
+                            "    <meta charset=\"utf-8\" />\n" +
+                            "    <title>用户注册-邮箱验证</title>\n" +
+                            "  </head>\n" +
+                            "  <body>\n" +
+                            "    <p>您好</p>\n" +
+                            "    <p style=\"text-indent: 10px\">您现在正在注册Simple Cloud账号</p>\n" +
+                            "    <p style=\"text-indent: 10px\">验证码: <span>" + code + "</span></p>\n" +
+                            "    <p style=\"text-indent: 10px\">邮箱: <span> " + toWho + " </span></p>\n" +
+                            "    <p>谢谢</p>\n" +
+                            "    <hr />\n" +
+                            "    <h5 style=\"color: black\">如果并非本人操作,请忽略本邮件</h5>\n" +
+                            "  </body>\n" +
+                            "</html>\n", true);
+            helper.setFrom("qiuxin136@163.com");
+            helper.setTo(toWho);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            return false;
+        }
+        mailSender.send(mimeMessage);
+        return true;
+    }
+
+    public boolean sendMail(String toWho, String subject, String content) {
+        LOGGER.info("Send mail to: " + toWho + ",subject: " + subject);
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message);
@@ -38,6 +69,8 @@ public class MailClient {
             mailSender.send(helper.getMimeMessage());
         } catch (MessagingException e) {
             e.printStackTrace();
+            return false;
         }
+        return true;
     }
 }
