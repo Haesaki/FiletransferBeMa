@@ -44,12 +44,23 @@ public class LoginController extends BaseController {
         User user = new User();
         logger.info("使用免登陆方式登录成功！" + user);
         model.addAttribute("loginUser", user);
-        return "redirect:/index";
+        return "redirect:/user/index";
     }
 
-    @RequestMapping("/login")
-    public String loginRequest() {
-        return "/login";
+    @PostMapping("/login")
+    public String login(User user, Map<String, Object> map) {
+        User userDB = userService.selectUserByEmail(user.getEmail());
+        if (userDB != null && userDB.getPassword().equals(user.getPassword())) {
+            session.setAttribute("loginUser", userDB);
+            logger.info("登录成功！"+userDB);
+            return "redirect:/user/index";
+        }else{
+            String errorMsg = userDB == null ? "该邮箱尚未注册" : "密码错误";
+            logger.info("登录失败！请确认邮箱和密码是否正确！");
+            //登录失败，将失败信息返回前端渲染
+            map.put("errorMsg", errorMsg);
+            return "index";
+        }
     }
 
     @PostMapping("/register")

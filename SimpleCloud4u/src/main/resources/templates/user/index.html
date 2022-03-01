@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no"
+          name="viewport">
+    <title>云盘 使用情况</title>
+
+    <link rel="stylesheet" href="../../static/modules/bootstrap/css/bootstrap.min.css"
+          th:href="@{/modules/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" href="../../static/modules/ionicons/css/ionicons.min.css"
+          th:href="@{/modules/ionicons/css/ionicons.min.css}">
+    <link rel="stylesheet" href="../../static/modules/fontawesome/web-fonts-with-css/css/fontawesome-all.min.css"
+          th:href="@{/modules/fontawesome/web-fonts-with-css/css/fontawesome-all.min.css}">
+    <link rel="stylesheet" href="../../static/modules/summernote/summernote-lite.css"
+          th:href="@{/modules/summernote/summernote-lite.css}">
+    <link rel="stylesheet" href="../../static/modules/flag-icon-css/css/flag-icon.min.css"
+          th:href="@{/modules/flag-icon-css/css/flag-icon.min.css}">
+    <link rel="stylesheet" href="../../static/css/demo.css"
+          th:href="@{/css/demo.css}">
+    <link rel="stylesheet" href="../../static/css/style.css"
+          th:href="@{/css/style.css}">
+</head>
+
+<body>
+<div id="app">
+    <div class="main-wrapper">
+        <div class="navbar-bg"></div>
+
+        <div th:replace="commons/bar::#top"></div>
+        <div th:replace="commons/bar::#sidebar(currUri='index',statistics = ${statistics})"></div>
+        <div class="main-content">
+            <section class="section">
+                <h1 class="section-header">
+                    <div><i class="ion ion-speedometer"></i> 使用情况</div>
+                </h1>
+                <div class="row">
+                    <div class="col-12 col-sm-6 col-lg-8">
+                        <div class="row">
+                            <div class="col-lg-6 col-md-6 col-12">
+                                <div class="card card-sm-4">
+                                    <div class="card-icon bg-primary">
+                                        <i class="ion ion-ios-folder"></i>
+                                    </div>
+                                    <div class="card-wrap">
+                                        <div class="card-header">
+                                            <h4>文件夹</h4>
+                                        </div>
+                                        <div class="card-body" th:text="${statistics.folderCount}"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-12">
+                                <div class="card card-sm-4">
+                                    <div class="card-icon bg-danger">
+                                        <i class="ion ion-android-document"></i>
+                                    </div>
+                                    <div class="card-wrap">
+                                        <div class="card-header">
+                                            <h4>文件</h4>
+                                        </div>
+                                        <div class="card-body" th:text="${statistics.fileCount}"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6 col-md-6 col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4>文件明细情况</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="myChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4>已使用/剩余容量（当前最大容量：[[${MAX_FILE_SIZE/(1024 * 1024)}]]MB）</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="myChart1"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!--        <div th:replace="commons/bar::#footer"></div>-->
+    </div>
+</div>
+<script src="../../static/modules/jquery.min.js"
+        th:href="@{/modules/jquery.min.js}"></script>
+<script>
+    $(function () {
+        let cur = [[${statistics.currentSize}]];
+        let max = [[${statistics.MAX_SIZE}]];
+        let w = cur / max * 100;
+        $('#progress').css('width', w + '%');
+    })
+</script>
+<script src="../../static/modules/popper.js"
+        th:href="@{/modules/popper.js}"></script>
+<script src="../../static/modules/tooltip.js"
+        th:href="@{/modules/tooltip.js}"></script>
+<script src="../../static/modules/bootstrap/js/bootstrap.min.js"
+        th:href="@{/modules/bootstrap/js/bootstrap.min.js}"></script>
+<script src="../../static/modules/nicescroll/jquery.nicescroll.min.js"
+        th:href="@{/modules/nicescroll/jquery.nicescroll.min.js}"></script>
+<script src="../../static/modules/scroll-up-bar/dist/scroll-up-bar.min.js"
+        th:href="@{/modules/scroll-up-bar/dist/scroll-up-bar.min.js}"></script>
+<script src="../../static/js/sa-functions.js"
+        th:href="@{/js/sa-functions.js}"></script>
+
+<script src="../../static/modules/chart.min.js"
+        th:href="@{/modules/chart.min.js}"></script>
+<script src="../../static/modules/summernote/summernote-lite.js"
+        th:href="@{/modules/summernote/summernote-lite.js}"></script>
+
+<script src="../../static/js/scripts.js"
+        th:href="@{/js/scripts.js}"></script>
+<script src="../../static/js/custom.js"
+        th:href="@{/js/custom.js}"></script>
+<script src="../../static/js/demo.js"
+        th:href="@{/js/demo.js}"></script>
+<script src="../../static/modules/chart.min.js"
+        th:href="@{/modules/chart.min.js}"></script>
+<script>
+    const ctx = document.getElementById("myChart").getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [
+                    [[${statistics.doc}]],
+                    [[${statistics.image}]],
+                    [[${statistics.video}]],
+                    [[${statistics.music}]],
+                    [[${statistics.other}]],
+                ],
+                backgroundColor: [
+                    '#3498db',
+                    '#28a745',
+                    '#ffc107',
+                    '#dc3545',
+                    '#343a40',
+                ],
+                label: 'Dataset 1'
+            }],
+            labels: [
+                '文档',
+                '图像',
+                '视频',
+                '音乐',
+                '其他'
+            ],
+        },
+        options: {
+            responsive: true,
+            legend: {
+                position: 'bottom',
+            },
+        }
+    });
+
+</script>
+<script>
+    const ctx = document.getElementById("myChart1").getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [
+                    [[${statistics.currentSize/1024}]],
+                    [[${(statistics.MAX_SIZE)/1024}]],
+                ],
+                backgroundColor: [
+                    '#223e36',
+                    '#c6e6e8'
+                ],
+                label: 'Dataset 1'
+            }],
+            labels: [
+                '已使用',
+                '剩余容量',
+            ],
+        },
+        options: {
+            responsive: true,
+            legend: {
+                position: 'bottom',
+            },
+        }
+    });
+
+</script>
+</body>
+</html>

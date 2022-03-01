@@ -109,6 +109,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
+
+        <!-- 主要是提供文件传输功能, 既是FTP -->
+        <!--        <dependency>-->
+        <!--            <groupId>commons-net</groupId>-->
+        <!--            <artifactId>commons-net</artifactId>-->
+        <!--            <version>3.8.0</version>-->
+        <!--        </dependency>-->
     </dependencies>
 
     <build>
