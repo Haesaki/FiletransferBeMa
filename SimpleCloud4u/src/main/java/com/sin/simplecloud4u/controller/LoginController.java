@@ -52,9 +52,9 @@ public class LoginController extends BaseController {
         User userDB = userService.selectUserByEmail(user.getEmail());
         if (userDB != null && userDB.getPassword().equals(user.getPassword())) {
             session.setAttribute("loginUser", userDB);
-            logger.info("登录成功！"+userDB);
+            logger.info("登录成功！" + userDB);
             return "redirect:/user/index";
-        }else{
+        } else {
             String errorMsg = userDB == null ? "该邮箱尚未注册" : "密码错误";
             logger.info("登录失败！请确认邮箱和密码是否正确！");
             //登录失败，将失败信息返回前端渲染
@@ -127,5 +127,12 @@ public class LoginController extends BaseController {
             return "success";
         }
         return "exitEmail";
+    }
+
+    @GetMapping("/logout")
+    public String logout() {
+        logger.info("用户退出登录！");
+        session.invalidate();
+        return "redirect:/";
     }
 }
