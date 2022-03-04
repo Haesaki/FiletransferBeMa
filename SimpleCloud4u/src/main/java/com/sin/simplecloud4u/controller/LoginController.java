@@ -3,6 +3,7 @@ package com.sin.simplecloud4u.controller;
 import com.sin.simplecloud4u.model.entity.User;
 import com.sin.simplecloud4u.service.interfa.UserService;
 import com.sin.simplecloud4u.util.MailClient;
+import com.sin.simplecloud4u.util.RandomUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,12 @@ public class LoginController extends BaseController {
     @GetMapping("/admin")
     public String adminLogin(Model model) {
         User user = new User();
+        user.setName("admin");
+        user.setPassword("admin");
+        user.setRole(true);
+        user.setEmail("admin");
+        user.setId(0);
+
         logger.info("使用免登陆方式登录成功！" + user);
         model.addAttribute("loginUser", user);
         return "redirect:/user/index";
@@ -75,6 +82,8 @@ public class LoginController extends BaseController {
         // 用户名去空格
         if (user.getName() != null)
             user.setName(user.getName().trim());
+        else
+            user.setName();
         user.setRole(false);
         // default avatar https://p.qpic.cn/qqconnect/0/app_101851241_1582451550/100?max-age=2592000&t=0
         if (userService.createUser(user)) {
@@ -118,7 +127,7 @@ public class LoginController extends BaseController {
         }
         logger.info(" 发送注册邮件到: " + email);
         MailClient mailClient = new MailClient(mailSender);
-        String code = String.valueOf((int) ((Math.random() * 9 + 1) * 100000));
+        String code = RandomUtil.randomVerificationCode();
         if (mailClient.sendCode(email, code)) {
             // 把Code丢到Redis储存池子中进行存储
             stringRedisTemplate.opsForValue().set(email + "_c", code, Duration.ofMinutes(10));

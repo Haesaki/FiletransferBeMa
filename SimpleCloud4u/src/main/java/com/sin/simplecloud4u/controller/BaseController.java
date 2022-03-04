@@ -16,6 +16,15 @@ public class BaseController {
     @Value("${sc4u.account.visitor.max-file-size}")
     protected int VISITOR_MAX_FILE;
 
+    @Value("${sc4u.tempFile.directory}")
+    protected String tempFilePath;
+
+    @Value("${sc4u.account.visitor.file-expired-time}")
+    protected String VISITOR_FILE_EXPIRED_TIME;
+
+    @Value("${sc4u.account.registered.file-expired-time}")
+    protected String REGISTERED_FILE_EXPIRED_TIME;
+
 
     protected HttpServletRequest request;
     protected HttpServletResponse response;
