@@ -5,7 +5,7 @@
     <title>Simple Cloud</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css'>
+    <!--    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css'>-->
     <link rel="stylesheet" href="../static/modules/bootstrap/css/bootstrap.min.css"
           th:href="@{/modules/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" href="../static/css/login.css" th:href="@{/css/login.css}">
@@ -16,7 +16,7 @@
     <div class="card-wrap">
         <div class="card border-0 shadow card--welcome is-show" id="welcome">
             <div class="card-body">
-                <h2 class="card-title"><i class="fa fa-cloud" aria-hidden="true"></i> Simple Cloud</h2>
+                <h2 class="card-title"><i class="" aria-hidden="true"></i> Simple Cloud</h2>
                 <br>
                 <!--判断是否包含错误信息-->
                 <p style="color: black" th:text="${errorMsg}"></p>
@@ -28,7 +28,7 @@
                 <p>分享文件 ‧ 无需登录</p>
                 <p class="badge-wrap">
                     <a title="上传  临时文件" class="badge btn-upload js-btn btn-success" data-target="upload">
-                        <i class="fa fa-upload" aria-hidden="true"></i>
+                        <i class="" aria-hidden="true"></i>
                     </a>
                 </p>
             </div>
@@ -82,7 +82,7 @@
                     <button class="btn btn-lg" type="submit">注册</button>
                 </form>
             </div>
-            <button class="btn btn-back js-btn" data-target="welcome"><i class="fas fa-angle-left"></i></button>
+            <button class="btn btn-back js-btn" data-target="welcome"><i class=""></i></button>
         </div>
         <div class="card border-0 shadow card--login" id="login">
             <div class="card-body">
@@ -107,7 +107,7 @@
                 </form>
                 <br><br>
             </div>
-            <button class="btn btn-back js-btn" data-target="welcome"><i class="fas fa-angle-left"></i></button>
+            <button class="btn btn-back js-btn" data-target="welcome"><i class=""></i></button>
         </div>
         <div class="card border-0 shadow card--upload" id="upload">
             <div class="card-body">
@@ -127,7 +127,7 @@
 
                 <br><br>
             </div>
-            <button class="btn btn-back js-btn" data-target="welcome"><i class="fas fa-angle-left"></i></button>
+            <button class="btn btn-back js-btn" data-target="welcome"><i class=""></i></button>
         </div>
     </div>
 </div>

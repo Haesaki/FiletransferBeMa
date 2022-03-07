@@ -30,19 +30,23 @@
 
 谢谢这些开源项目
 
-[SpringBoot](https://github.com/spring-projects/spring-boot)
+### Java相关的 开源的项目
 
-[SpringBoot data redis](https://spring.io/projects/spring-data-redis)
+[SpringBoot](https://github.com/spring-projects/spring-boot),
 
-[Thymeleaf](https://github.com/thymeleaf/thymeleaf)
+[SpringBoot data redis](https://spring.io/projects/spring-data-redis),
 
-[redis](https://github.com/redis/redis)
+[Thymeleaf](https://github.com/thymeleaf/thymeleaf),
 
-[Apache Shiro](https://github.com/apache/shiro)
+[redis](https://github.com/redis/redis),
 
-[easyUpload.js 文件上传Js库](https://github.com/funnyque/easyUpload.js)
+[Apache Shiro](https://github.com/apache/shiro),
 
-[xcConfirm 弹窗Js库](https://github.com/WXAlbert/xcConfirm)
+### JavaScript 开源库
 
-[Dropzone 文件上传展示Js库 ](https://github.com/dropzone/dropzone)
+[easyUpload.js 文件上传Js库](https://github.com/funnyque/easyUpload.js),
+
+[xcConfirm 弹窗Js库](https://github.com/WXAlbert/xcConfirm),
+
+[Dropzone 文件上传展示Js库 ](https://github.com/dropzone/dropzone), 
 
