@@ -1,0 +1,15 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# .idea
+compiler.xml
+jarRepositories.xml
+misc.xml
+vcs.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+
+
+# Learn Shiro ignore
+/src/main/java/com/sin/ShiroLearn/
+

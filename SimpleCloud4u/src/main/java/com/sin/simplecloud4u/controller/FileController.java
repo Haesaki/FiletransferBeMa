@@ -27,7 +27,7 @@ public class FileController extends BaseController {
 
     private final StringRedisTemplate redisTemplate;
 
-    private final FileStorage
+    private final ;
 
     @Autowired
     public FileController(StringRedisTemplate redisTemplate) {
@@ -132,7 +132,7 @@ public class FileController extends BaseController {
             response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
             if (flag == 1) {
                 Resource resource =
-                File shareFile = new File(tempFilePath + fileName);
+                        File shareFile = new File(tempFilePath + fileName);
                 if (!shareFile.exists()) {
                     session.setAttribute("msg", "链接或者验证码存在错误!");
                     return "redirect:/error400Page";
