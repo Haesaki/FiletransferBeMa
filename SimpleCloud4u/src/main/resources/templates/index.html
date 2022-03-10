@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <title>Simple Cloud</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!--    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css'>-->
     <link rel="stylesheet" href="../static/modules/bootstrap/css/bootstrap.min.css"
           th:href="@{/modules/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" href="../static/css/login.css" th:href="@{/css/login.css}">
@@ -28,7 +26,7 @@
                 <p>分享文件 ‧ 无需登录</p>
                 <p class="badge-wrap">
                     <a title="上传  临时文件" class="badge btn-upload js-btn btn-success" data-target="upload">
-                        <i class="" aria-hidden="true"></i>
+                        <i class="" aria-hidden="true">UP</i>
                     </a>
                 </p>
             </div>
@@ -82,7 +80,7 @@
                     <button class="btn btn-lg" type="submit">注册</button>
                 </form>
             </div>
-            <button class="btn btn-back js-btn" data-target="welcome"><i class=""></i></button>
+            <button class="btn btn-back js-btn" data-target="welcome"><i class="">back</i></button>
         </div>
         <div class="card border-0 shadow card--login" id="login">
             <div class="card-body">
@@ -107,13 +105,13 @@
                 </form>
                 <br><br>
             </div>
-            <button class="btn btn-back js-btn" data-target="welcome"><i class=""></i></button>
+            <button class="btn btn-back js-btn" data-target="welcome"><i class="">back</i></button>
         </div>
         <div class="card border-0 shadow card--upload" id="upload">
             <div class="card-body">
                 <h2 class="card-title">临时文件</h2>
                 <br>
-                <p style="color: black">仅4小时有效</p><br>
+                <p style="color: black">仅<i>1</i>天有效</p><br>
                 <form id="tempFile" method="post" action="uploadTempFile" multiple="multiple"
                       enctype="multipart/form-data">
                     <div class="form-group">
@@ -124,10 +122,12 @@
                     </div>
                     <button class="btn btn-lg btn-success" type="button" onclick="check()">上传</button>
                 </form>
-
                 <br><br>
+                <p th:if="${msg!=null}" th:text="${msg}"></p>
+                <br th:if="${msg != null}">
+                <p th:if="${shareLinkInfo!=null}" th:text="${shareLinkInfo}"></p>
             </div>
-            <button class="btn btn-back js-btn" data-target="welcome"><i class=""></i></button>
+            <button class="btn btn-back js-btn" data-target="welcome"><i class="">back</i></button>
         </div>
     </div>
 </div>
@@ -139,22 +139,22 @@
             alert("请选择文件！");
             return;
         }
-        var size = $("input[type=file]").get(0).files[0].size;
+        let size = $("input[type=file]").get(0).files[0].size;
         if (size > 10485760) {
             alert("临时文件最大可上传10MB！");
             return;
         }
-        var location = window.location.href;
+        let location = window.location.href;
         let strings = location.split("sc4u");
         $('#url').val(strings[0] + "sc4u");
         $('#tempFile').submit();
     }
 
-    var emailReg = /^[\da-z]+([\-\.\_]?[\da-z]+)*@[\da-z]+([\-\.]?[\da-z]+)*(\.[a-z]{2,})+$/;//邮箱正则
-    var userNameReg = /^[\u4e00-\u9fa5\w]{1,6}$/;//用户名正则
-    var count = 60; //间隔函数，1秒执行
-    var InterValObj1; //timer变量，控制时间
-    var curCount1;//当前剩余秒数
+    let emailReg = /^[\da-z]+([\-\.\_]?[\da-z]+)*@[\da-z]+([\-\.]?[\da-z]+)*(\.[a-z]{2,})+$/;//邮箱正则
+    let userNameReg = /^[\u4e00-\u9fa5\w]{1,6}$/;//用户名正则
+    let count = 60; //间隔函数，1秒执行
+    let InterValObj1; //timer变量，控制时间
+    let curCount1;//当前剩余秒数
     /*第一*/
     function sendMessage1() {
         curCount1 = count;

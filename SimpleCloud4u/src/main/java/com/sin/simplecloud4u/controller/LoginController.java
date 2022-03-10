@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.UUID;
 
 @Controller
 public class LoginController extends BaseController {
@@ -83,7 +84,7 @@ public class LoginController extends BaseController {
         if (user.getName() != null)
             user.setName(user.getName().trim());
         else
-            user.setName();
+            user.setName(UUID.randomUUID().toString());
         user.setRole(false);
         // default avatar https://p.qpic.cn/qqconnect/0/app_101851241_1582451550/100?max-age=2592000&t=0
         if (userService.createUser(user)) {

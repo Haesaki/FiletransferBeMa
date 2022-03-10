@@ -16,6 +16,9 @@ public class BaseController {
     @Value("${sc4u.account.visitor.max-file-size}")
     protected int VISITOR_MAX_FILE;
 
+    @Value("${sc4u.file.directory}")
+    protected String fileDirectory;
+
     @Value("${sc4u.tempFile.directory}")
     protected String tempFilePath;
 

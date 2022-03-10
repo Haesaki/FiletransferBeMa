@@ -4,16 +4,16 @@ import com.sin.simplecloud4u.util.RandomUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
@@ -27,123 +27,70 @@ public class FileController extends BaseController {
 
     private final StringRedisTemplate redisTemplate;
 
-    private final ;
-
     @Autowired
     public FileController(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
     @PostMapping("/uploadTempFile")
-    public String uploadTempFile(@RequestParam("file") MultipartFile file, String url) {
-        File tempDirectory = new File(tempFilePath);
+    public String uploadTempFile(@RequestParam("file") MultipartFile file, String url, RedirectAttributes attributes) {
+        File tempDirectory = new File(fileDirectory + tempFilePath);
         if (!tempDirectory.exists())
             tempDirectory.mkdirs();
 
         if (Boolean.TRUE.equals(redisTemplate.opsForSet().isMember("tempFIle", file.getName()))) {
-            session.setAttribute("msg", "文件名不符合标准，请修改文件名(在文件名末尾加上随机数字串)!!");
-            return "redirect:/temp-file";
+            return "redirect:/error404Page";
         }
 
+        // 客户端地址
         String remoteAddr = request.getRemoteAddr();
         // 单位是字节
         long fileSize = file.getSize();
-        String code = RandomUtil.randomVerificationCode();
-        // 未登录
+
+        // 上传文件大小是否满足要求
+        // 并且将过程塞到日志里面去
         if (session.getAttribute("user") == null) {
-            if (fileSize < VISITOR_MAX_FILE) {
-                redisTemplate.opsForValue().set("tempFile", Objects.requireNonNull(file.getOriginalFilename()), Duration.ofDays(Long.parseLong(VISITOR_FILE_EXPIRED_TIME)));
-                redisTemplate.opsForValue().set("sf2_" + file.getOriginalFilename(), code);
+            if (fileSize > VISITOR_MAX_FILE)
+                attributes.addFlashAttribute("msg", "您的文件超出了文件上传大小的限制，请尝试上传小于" + VISITOR_MAX_FILE + "bits 的文件!!");
+            else
                 logger.info("Not Login " + remoteAddr + " upload " + file.getOriginalFilename() + "-" + fileSize);
-                allowedToCreateFile(file, url);
-            } else {
-                session.setAttribute("msg", "您的文件超出了文件上传大小的限制，请尝试上传小于" + VISITOR_MAX_FILE + "bits 的文件!!");
-            }
-        } else if (fileSize < REGISTERED_MAX_FILE) {
-            // 不符合上面的判断的就是登录用户
-            logger.info("Login " + remoteAddr + " upload " + file.getOriginalFilename() + "-" + String.valueOf(fileSize));
-            redisTemplate.opsForValue().set("tempFile", Objects.requireNonNull(file.getOriginalFilename()), Duration.ofDays(Long.parseLong(REGISTERED_FILE_EXPIRED_TIME)));
-            redisTemplate.opsForValue().set("sf2_" + file.getOriginalFilename(), code);
-            logger.info("Login " + remoteAddr + " upload " + file.getOriginalFilename() + "-" + fileSize);
-            allowedToCreateFile(file, url);
         } else {
-            // 登录用户 文件大小超出了限制
-            session.setAttribute("msg", "您的文件超出了文件上传大小的限制，请尝试上传小于" + String.valueOf(REGISTERED_MAX_FILE) + "bits 的文件!!");
+            if (fileSize > REGISTERED_MAX_FILE)
+                attributes.addFlashAttribute("msg", "您的文件超出了文件上传大小的限制，请尝试上传小于" + VISITOR_MAX_FILE + "bits 的文件!!");
+            else
+                logger.info("Login " + remoteAddr + " upload " + file.getOriginalFilename() + "-" + String.valueOf(fileSize));
         }
-        return "redirect:/temp-file";
+
+        // 将重要信息放到redis里面去记录
+        String code = RandomUtil.randomVerificationCode();
+        redisTemplate.opsForValue().set("tempFile", Objects.requireNonNull(file.getOriginalFilename()), Duration.ofDays(Long.parseLong(VISITOR_FILE_EXPIRED_TIME)));
+        redisTemplate.opsForValue().set("sf2_" + file.getOriginalFilename(), code);
+
+        // 创建文件
+        if (!allowedToCreateFile(file)) {
+            attributes.addFlashAttribute("error", "创建文件出错");
+        } else {
+            url = url + "/file/share?name=" + Base64.getEncoder().encodeToString(Objects.requireNonNull(file.getOriginalFilename()).getBytes(StandardCharsets.UTF_8)) + "&flag=2";
+            attributes.addFlashAttribute("shareInfo", url + " Code: " + code);
+            attributes.addFlashAttribute("msg", "上传成功，访问链接 即可下载！");
+        }
+        return "redirect:/file/shareInfo";
     }
 
-    private void allowedToCreateFile(@RequestParam("file") MultipartFile file, String url) {
+    // 刚刚上传了一份文件 链接 url -> http://127.0.0.1:7777/sc4u/file/share?name=d2FsbGhhdmVuLThva3kxai5qcGc=&flag=2
+    private boolean allowedToCreateFile(@RequestParam("file") MultipartFile file) {
+        File uploadFile = new File(fileDirectory + tempFilePath + file.getOriginalFilename());
         try {
-            if (!createFile(tempFilePath + file.getOriginalFilename(), file.getBytes()))
-                session.setAttribute("msg", "文件错误！！！");
-            else {
-                url = url + "/file/share?name=" + Base64.getEncoder().encodeToString(Objects.requireNonNull(file.getOriginalFilename()).getBytes(StandardCharsets.UTF_8)) + "&flag=2";
-                session.setAttribute("url", url);
-                session.setAttribute("msg", "上传成功，访问链接 即可下载！");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            session.setAttribute("msg", "文件错误!!");
-        }
-    }
-
-    private boolean createFile(String filePath, byte[] content) {
-        File file = new File(filePath);
-        if (file.exists())
-            return false;
-        try {
-            if (!file.createNewFile())
+            if (!uploadFile.createNewFile())
                 return false;
-            FileOutputStream fileOutputStream = new FileOutputStream(file);
-            fileOutputStream.write(content);
+            FileOutputStream fileOutputStream = new FileOutputStream(uploadFile);
+            fileOutputStream.write(file.getBytes());
             fileOutputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
             return false;
         }
         return true;
-    }
-
-    // flag == 1 为用户文件分享
-    //  链接包含文件名, 标志位, 用户id
-    //  redis会存储该文件对应的在该用户的网盘里面的路径以及验证码 2天有效期
-    //  文件存放在用户自定义的路径下面,通过userid和filename的注册在redis中查询值
-    // flag == 2 临时文件分享
-    //  链接包含文件名, 标志位
-    //  redis只储存该文件对应的验证码
-    //  文件存放在tempfile目录下
-    @GetMapping("/file/share")
-    public String getShareFile(@RequestParam(value = "userId", required = false) String userId,
-                               @RequestParam(value = "name", required = true) String na,
-                               @RequestParam(value = "flag", required = true) int flag,
-                               @RequestParam(value = "verificationCode", required = true) String verificationCode) {
-        String fileName = new String(Base64.getDecoder().decode(na), StandardCharsets.UTF_8);
-        // 验证验证码
-        String vCode = redisTemplate.opsForValue().get("sf2_" + fileName);
-        if (vCode == null || !vCode.equals(verificationCode)) {
-            // TODO: 禁止IP频繁访问
-            session.setAttribute("msg", "链接或者验证码存在错误!");
-            return "redirect:/error400Page";
-        }
-        try (OutputStream os = new BufferedOutputStream(response.getOutputStream());) {
-            response.setCharacterEncoding("utf-8");
-            response.setContentType("multipart/form-data");
-            response.setHeader("Content-Disposition", "attachment;fileName=" + fileName);
-            if (flag == 1) {
-                Resource resource =
-                        File shareFile = new File(tempFilePath + fileName);
-                if (!shareFile.exists()) {
-                    session.setAttribute("msg", "链接或者验证码存在错误!");
-                    return "redirect:/error400Page";
-                }
-            } else if (flag == 2) {
-            }
-            os.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "";
     }
 
 //    /**

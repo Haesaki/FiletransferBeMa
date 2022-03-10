@@ -58,9 +58,10 @@ public class MVCConfiguration implements WebMvcConfigurer, ErrorPageRegistrar {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new LoginHandlerInterceptor()).addPathPatterns("/**")
                 .excludePathPatterns(
-                        "/", "/temp-file", "/error400Page", "/error401Page", "/error404Page", "/error500Page", "/uploadTempFile", "/admin", "/sendCode", "/loginByQQ", "/login", "/register", "/file/share", "/connection",
-                        "/asserts/**", "/**/*.css", "/**/*.js", "/**/*.png ", "/**/*.jpg"
-                        , "/**/*.jpeg", "/**/*.gif", "/**/fonts/*", "/**/*.svg");
+                        "/", "/file/*", "/error400Page", "/error401Page", "/error404Page", "/error500Page", "/uploadTempFile", "/admin", "/sendCode", "/loginByQQ", "/login", "/register", "/file/share", "/connection",
+                        "/asserts/**", "/**/*.css", "/**/*.js", "/**/*.png ", "/**/*.jpg",
+                        "/**/*.jpeg", "/**/*.gif", "/**/fonts/*", "/**/*.svg",
+                        "/sc4u/file/share");
     }
 
     /**

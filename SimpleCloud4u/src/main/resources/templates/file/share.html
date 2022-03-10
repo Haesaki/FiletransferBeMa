@@ -1,10 +1,16 @@
 <!DOCTYPE html>
-<html lang="zh-cn">
+<html lang="zh-cn" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
-    <title>文件分享界面</title>
+    <title>文件分享</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <link rel="stylesheet" href="../static/modules/bootstrap/css/bootstrap.min.css"
+          th:href="@{/modules/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" href="../static/css/login.css" th:href="@{/css/login.css}">
+    <link rel="stylesheet" href="../static/css/upload-file.css" th:href="@{/css/upload-file.css}">
     <style type="text/css">
         body {
             background-color: #2F3242;
@@ -55,7 +61,7 @@
         }
 
         .buttons-con .action-link-wrap a:hover {
-            background: #5A5C6C;
+            background: #cbf0f3;
             color: #fff;
         }
 
@@ -114,35 +120,113 @@
                 margin-left: -190px;
                 text-align: center;
             }
+
+            .info-left {
+                width: 60%;
+                height: 500px;
+                float: left;
+            }
+
+            .info-right {
+                width: 40%;
+                height: 500px;
+                float: right;
+            }
         }
     </style>
 </head>
 
 <body>
 
-
-<svg width="380px" height="500px" viewBox="0 0 837 1045" version="1.1" xmlns="http://www.w3.org/2000/svg"
-     xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
-    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
-        <path d="M353,9 L626.664028,170 L626.664028,487 L353,642 L79.3359724,487 L79.3359724,170 L353,9 Z"
-              id="Polygon-1" stroke="#007FB2" stroke-width="6" sketch:type="MSShapeGroup"></path>
-        <path d="M78.5,529 L147,569.186414 L147,648.311216 L78.5,687 L10,648.311216 L10,569.186414 L78.5,529 Z"
-              id="Polygon-2" stroke="#EF4A5B" stroke-width="6" sketch:type="MSShapeGroup"></path>
-        <path d="M773,186 L827,217.538705 L827,279.636651 L773,310 L719,279.636651 L719,217.538705 L773,186 Z"
-              id="Polygon-3" stroke="#795D9C" stroke-width="6" sketch:type="MSShapeGroup"></path>
-        <path d="M639,529 L773,607.846761 L773,763.091627 L639,839 L505,763.091627 L505,607.846761 L639,529 Z"
-              id="Polygon-4" stroke="#F2773F" stroke-width="6" sketch:type="MSShapeGroup"></path>
-        <path d="M281,801 L383,861.025276 L383,979.21169 L281,1037 L179,979.21169 L179,861.025276 L281,801 Z"
-              id="Polygon-5" stroke="#36B455" stroke-width="6" sketch:type="MSShapeGroup"></path>
-    </g>
-</svg>
-<div class="message-box">
-    <h1>文件分享</h1>
-    <p>链接</p>
-    <p>密码 9088675</p>
+<div class="ui container">
+    <div class="ui stackable grid">
+        <div class="twelve wide column">
+            <svg width="380px" height="500px" viewBox="0 0 837 1045" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                 xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+                    <path d="M353,9 L626.664028,170 L626.664028,487 L353,642 L79.3359724,487 L79.3359724,170 L353,9 Z"
+                          id="Polygon-1" stroke="#007FB2" stroke-width="6" sketch:type="MSShapeGroup"></path>
+                    <path d="M78.5,529 L147,569.186414 L147,648.311216 L78.5,687 L10,648.311216 L10,569.186414 L78.5,529 Z"
+                          id="Polygon-2" stroke="#EF4A5B" stroke-width="6" sketch:type="MSShapeGroup"></path>
+                    <path d="M773,186 L827,217.538705 L827,279.636651 L773,310 L719,279.636651 L719,217.538705 L773,186 Z"
+                          id="Polygon-3" stroke="#795D9C" stroke-width="6" sketch:type="MSShapeGroup"></path>
+                    <path d="M639,529 L773,607.846761 L773,763.091627 L639,839 L505,763.091627 L505,607.846761 L639,529 Z"
+                          id="Polygon-4" stroke="#F2773F" stroke-width="6" sketch:type="MSShapeGroup"></path>
+                    <path d="M281,801 L383,861.025276 L383,979.21169 L281,1037 L179,979.21169 L179,861.025276 L281,801 Z"
+                          id="Polygon-5" stroke="#36B455" stroke-width="6" sketch:type="MSShapeGroup"></path>
+                </g>
+            </svg>
+        </div>
+        <div class="four wide column">
+            <h2 th:if="${filename==null}">ERROR</h2>
+            <div th:if="${filename!=null}" class="info-right card-wrap">
+                <div class="card border-0 shadow card--welcome is-show" id="login">
+                    <div class="card-body">
+                        <h3 th:if="${filename!=null}" th:text="${filename}"></h3>
+                        <p th:if="${filename==null}">Please double check your url!</p>
+                        <p th:if="${msg != null}" th:text="${msg}" style="color: black"></p>
+                        <br><br>
+                        <form th:if="${filename!=null}" method="post">
+                            <div class="form-group">
+                                <label>
+                                    <input class="form-control" type="text" th:placeholder="验证码" name="verificationCode"
+                                           required="required"/>
+                                </label>
+                            </div>
+                            <button type="submit" style="color: black">下载</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 
-</body>
+<!--<div class="message-box">-->
+<!--    <h1 th:if="${filename==null}" style="color: black">ERROR</h1>-->
+<!--    <h1 th:if="${filename!=null}" th:text="${filename}" style="color: black"></h1>-->
+<!--    <p th:if="${filename==null}" style="color: black">Please double check your url!</p>-->
+<!--    <p th:if="${msg != null}" th:text="${msg}" style="color: black"></p>-->
+<!--    <form th:if="${filename!=null}" method="post" action="login">-->
+<!--        <div class="form-group">-->
+<!--            <label>-->
+<!--                <input class="form-control" type="email" th:placeholder="邮箱" name="email"-->
+<!--                       required="required"-->
+<!--                       onkeyup="this.value=this.value.replace(/\s+/g,'')"/>-->
+<!--            </label>-->
+<!--        </div>-->
+<!--        <button class="btn btn-lg" type="submit">登录</button>-->
+<!--    </form>-->
+<!--</div>-->
 
+
+</body>
+<script src="../static/js/jquery-3.4.1.js" th:src="@{/js/jquery-3.4.1.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+<script src="../static/js/login.js" th:src="@{/js/login.js}"></script>
+<script>
+    //设置button效果，开始计时
+    //向后台发送处理数据
+    // $.ajax({
+    //     type: "GET",
+    //     url: "sendCode",
+    //     async: false,
+    //     contentType: "application/json; charset=utf-8",
+    //     dataType: "text",
+    //     data: {name: name, password: password, email: email, invitationCode: invitationCode},
+    //     success: function (result) {
+    //         if (result === "exitEmail") {
+    //             window.clearInterval(InterValObj1);
+    //             $("#btnSendCode1").val("获取验证码");
+    //             $("#btnSendCode1").removeAttr("disabled");//启用按钮
+    //             alert("这个邮箱已经被使用了哦！");
+    //         }
+    //         return false;
+    //     },
+    //     error: function (msg) {
+    //         return false;
+    //     }
+    // });
+</script>
 </html>
