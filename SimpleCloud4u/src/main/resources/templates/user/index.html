@@ -78,7 +78,7 @@
                             <div class="col-lg-6 col-md-6 col-12">
                                 <div class="card">
                                     <div class="card-header">
-                                        <h4>已使用/剩余容量（当前最大容量：[[${MAX_FILE_SIZE/(1024 * 1024)}]]MB）</h4>
+                                        <h4>已使用/剩余容量（当前最大容量：[[${MAX_FILE_SIZE/(1024)}]]MB）</h4>
                                     </div>
                                     <div class="card-body">
                                         <canvas id="myChart1"></canvas>
@@ -93,8 +93,6 @@
         <!--        <div th:replace="commons/bar::#footer"></div>-->
     </div>
 </div>
-<script src="../../static/modules/jquery.min.js"
-        th:href="@{/modules/jquery.min.js}"></script>
 <script>
     $(function () {
         let cur = [[${statistics.currentSize}]];
@@ -103,35 +101,37 @@
         $('#progress').css('width', w + '%');
     })
 </script>
+<script src="../../static/modules/jquery.min.js"
+        th:src="@{/modules/jquery.min.js}"></script>
 <script src="../../static/modules/popper.js"
-        th:href="@{/modules/popper.js}"></script>
+        th:src="@{/modules/popper.js}"></script>
 <script src="../../static/modules/tooltip.js"
-        th:href="@{/modules/tooltip.js}"></script>
+        th:src="@{/modules/tooltip.js}"></script>
 <script src="../../static/modules/bootstrap/js/bootstrap.min.js"
-        th:href="@{/modules/bootstrap/js/bootstrap.min.js}"></script>
+        th:src="@{/modules/bootstrap/js/bootstrap.min.js}"></script>
 <script src="../../static/modules/nicescroll/jquery.nicescroll.min.js"
-        th:href="@{/modules/nicescroll/jquery.nicescroll.min.js}"></script>
+        th:src="@{/modules/nicescroll/jquery.nicescroll.min.js}"></script>
 <script src="../../static/modules/scroll-up-bar/dist/scroll-up-bar.min.js"
-        th:href="@{/modules/scroll-up-bar/dist/scroll-up-bar.min.js}"></script>
+        th:src="@{/modules/scroll-up-bar/dist/scroll-up-bar.min.js}"></script>
 <script src="../../static/js/sa-functions.js"
-        th:href="@{/js/sa-functions.js}"></script>
+        th:src="@{/js/sa-functions.js}"></script>
 
 <script src="../../static/modules/chart.min.js"
-        th:href="@{/modules/chart.min.js}"></script>
+        th:src="@{/modules/chart.min.js}"></script>
 <script src="../../static/modules/summernote/summernote-lite.js"
-        th:href="@{/modules/summernote/summernote-lite.js}"></script>
+        th:src="@{/modules/summernote/summernote-lite.js}"></script>
 
 <script src="../../static/js/scripts.js"
-        th:href="@{/js/scripts.js}"></script>
+        th:src="@{/js/scripts.js}"></script>
 <script src="../../static/js/custom.js"
-        th:href="@{/js/custom.js}"></script>
+        th:src="@{/js/custom.js}"></script>
 <script src="../../static/js/demo.js"
-        th:href="@{/js/demo.js}"></script>
+        th:src="@{/js/demo.js}"></script>
 <script src="../../static/modules/chart.min.js"
-        th:href="@{/modules/chart.min.js}"></script>
+        th:src="@{/modules/chart.min.js}"></script>
 <script>
-    const ctx = document.getElementById("myChart").getContext('2d');
-    const myChart = new Chart(ctx, {
+    const chartContext1 = document.getElementById("myChart").getContext('2d');
+    const myChart = new Chart(chartContext1, {
         type: 'doughnut',
         data: {
             datasets: [{
@@ -169,14 +169,14 @@
 
 </script>
 <script>
-    const ctx = document.getElementById("myChart1").getContext('2d');
-    const myChart = new Chart(ctx, {
+    const chartContext2 = document.getElementById("myChart1").getContext('2d');
+    const myChart1 = new Chart(chartContext2, {
         type: 'doughnut',
         data: {
             datasets: [{
                 data: [
-                    [[${statistics.currentSize/1024}]],
-                    [[${(statistics.MAX_SIZE)/1024}]],
+                    [[${statistics.currentSize/(1024 * 1024)}]],
+                    [[${(statistics.MAX_SIZE)/(1024 * 1024)}]],
                 ],
                 backgroundColor: [
                     '#223e36',
@@ -185,8 +185,8 @@
                 label: 'Dataset 1'
             }],
             labels: [
-                '已使用',
-                '剩余容量',
+                '已使用 (MB)',
+                '剩余容量 (MB)',
             ],
         },
         options: {

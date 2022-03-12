@@ -5,6 +5,17 @@ import org.springframework.beans.factory.annotation.Value;
 import java.io.Serializable;
 
 public class FileStatistics implements Serializable {
+    public FileStatistics() {
+        this.doc = 0;
+        this.music = 0;
+        this.video = 0;
+        this.image = 0;
+        this.other = 0;
+        this.fileCount = 0;
+        this.folderCount = 0;
+        this.currentSize = 0;
+    }
+
     /**
      * 文档数
      */
@@ -36,6 +47,7 @@ public class FileStatistics implements Serializable {
 
     public long currentSize;
 
-    @Value("sc4u.account.registered.max-file-size")
     public long MAX_SIZE;
+
+    private FileStore fileStore;
 }

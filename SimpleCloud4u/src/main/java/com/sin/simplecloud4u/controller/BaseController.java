@@ -28,6 +28,9 @@ public class BaseController {
     @Value("${sc4u.account.registered.file-expired-time}")
     protected String REGISTERED_FILE_EXPIRED_TIME;
 
+    @Value("${sc4u.account.registered.storage-size}")
+    protected long REGISTERED_FILE_MAX_SIZE;
+
 
     protected HttpServletRequest request;
     protected HttpServletResponse response;

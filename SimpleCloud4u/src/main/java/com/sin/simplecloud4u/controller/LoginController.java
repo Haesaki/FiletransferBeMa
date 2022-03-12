@@ -59,6 +59,7 @@ public class LoginController extends BaseController {
     public String login(User user, Map<String, Object> map) {
         User userDB = userService.selectUserByEmail(user.getEmail());
         if (userDB != null && userDB.getPassword().equals(user.getPassword())) {
+            userDB.setPassword("");
             session.setAttribute("loginUser", userDB);
             logger.info("登录成功！" + userDB);
             return "redirect:/user/index";

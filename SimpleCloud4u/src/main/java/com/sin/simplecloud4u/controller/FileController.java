@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -17,6 +18,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -93,100 +96,16 @@ public class FileController extends BaseController {
         return true;
     }
 
-//    /**
-//     * @Description 网盘的文件上传
-//     * @Author xw
-//     * @Date 23:10 2020/2/10
-//     * @Param [files]
-//     * @return java.util.Map<java.lang.String,java.lang.Object>
-//     **/
-//    @PostMapping("/uploadFile")
-//    @ResponseBody
-//    public Map<String, Object> uploadFile(@RequestParam("file") MultipartFile files) {
-//        Map<String, Object> map = new HashMap<>();
-//        if (fileStoreService.getFileStoreByUserId(loginUser.getUserId()).getPermission() != 0){
-//            logger.error("用户没有上传文件的权限!上传失败...");
-//            map.put("code", 499);
-//            return map;
-//        }
-//        FileStore store = fileStoreService.getFileStoreByUserId(loginUser.getUserId());
-//        Integer folderId = Integer.valueOf(request.getHeader("id"));
-//        String name = files.getOriginalFilename().replaceAll(" ","");
-//        //获取当前目录下的所有文件，用来判断是否已经存在
-//        List<MyFile> myFiles = null;
-//        if (folderId == 0){
-//            //当前目录为根目录
-//            myFiles = myFileService.getRootFilesByFileStoreId(loginUser.getFileStoreId());
-//        }else {
-//            //当前目录为其他目录
-//            myFiles = myFileService.getFilesByParentFolderId(folderId);
-//        }
-//        for (int i = 0; i < myFiles.size(); i++) {
-//            if ((myFiles.get(i).getMyFileName()+myFiles.get(i).getPostfix()).equals(name)){
-//                logger.error("当前文件已存在!上传失败...");
-//                map.put("code", 501);
-//                return map;
-//            }
-//        }
-//        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-//        String dateStr = format.format(new Date());
-//        String path = loginUser.getUserId()+"/"+dateStr +"/"+folderId;
-//        if (!checkTarget(name)){
-//            logger.error("上传失败!文件名不符合规范...");
-//            map.put("code", 502);
-//            return map;
-//        }
-//        Integer sizeInt = Math.toIntExact(files.getSize() / 1024);
-//        //是否仓库放不下该文件
-//        if(store.getCurrentSize()+sizeInt > store.getMaxSize()){
-//            logger.error("上传失败!仓库已满。");
-//            map.put("code", 503);
-//            return map;
-//        }
-//        //处理文件大小
-//        String size = String.valueOf(files.getSize()/1024.0);
-//        int indexDot = size.lastIndexOf(".");
-//        size = size.substring(0,indexDot);
-//        int index = name.lastIndexOf(".");
-//        String tempName = name;
-//        String postfix = "";
-//        int type = 4;
-//        if (index!=-1){
-//            tempName = name.substring(index);
-//            name = name.substring(0,index);
-//            //获得文件类型
-//            type = getType(tempName.toLowerCase());
-//            postfix = tempName.toLowerCase();
-//        }
-//        try {
-//            //提交到FTP服务器
-//            boolean b = FtpUtil.uploadFile("/"+path, name + postfix, files.getInputStream());
-//            if (b){
-//                //上传成功
-//                logger.info("文件上传成功!"+files.getOriginalFilename());
-//                //向数据库文件表写入数据
-//                myFileService.addFileByFileStoreId(
-//                        MyFile.builder()
-//                                .myFileName(name).fileStoreId(loginUser.getFileStoreId()).myFilePath(path)
-//                                .downloadTime(0).uploadTime(new Date()).parentFolderId(folderId).
-//                                size(Integer.valueOf(size)).type(type).postfix(postfix).build());
-//                //更新仓库表的当前大小
-//                fileStoreService.addSize(store.getFileStoreId(),Integer.valueOf(size));
-//                try {
-//                    Thread.sleep(5000);
-//                    map.put("code", 200);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }else{
-//                logger.error("文件上传失败!"+files.getOriginalFilename());
-//                map.put("code", 504);
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return map;
-//    }
+    /**
+     * 网盘的文件上传
+     **/
+    @PostMapping("/uploadFile")
+    @ResponseBody
+    public Map<String, Object> uploadFile(@RequestParam("file") MultipartFile file) {
+        Map<String, Object> map = new HashMap<>();
+        String fileName = file.getOriginalFilename();
+        return map;
+    }
 
     // 正则验证文件名是否合法 [汉字,字符,数字,下划线,英文句号,横线]
     public boolean checkTarget(String target) {

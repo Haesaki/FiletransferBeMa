@@ -1,10 +1,8 @@
 package com.sin.simplecloud4u.controller;
 
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.xml.ResourceEntityResolver;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -16,11 +14,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import redis.clients.jedis.search.FieldName;
 
-import javax.servlet.ServletOutputStream;
-import java.io.*;
-import java.net.URLEncoder;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
@@ -70,7 +67,7 @@ public class ShareFileController extends BaseController {
         }
         InputStreamResource resource = new InputStreamResource(new FileInputStream(downloadFile));
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + downloadFile.getName() + "\"")
                 .contentLength(downloadFile.length())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
