@@ -45,7 +45,7 @@ public class LoginController extends BaseController {
         if (userDB != null && userDB.getPassword().equals(user.getPassword())) {
             userDB.setPassword("");
             session.setAttribute("loginUser", userDB);
-            String directoryPath = fileDirectory + "/" + loginUser.getId();
+            String directoryPath = fileDirectory + "/" + userDB.getId();
             File userDirectory = new File(directoryPath);
             if (!userDirectory.exists())
                 userDirectory.mkdirs();
