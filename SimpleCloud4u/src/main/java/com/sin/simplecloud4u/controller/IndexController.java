@@ -57,14 +57,18 @@ public class IndexController extends BaseController {
                 map.put("error", "重命名失败！文件夹已存在");
             }
         }
-        DirectoryEntity nowDirectory = (DirectoryEntity) session.getAttribute("directory");
-        List<DirectoryEntity> directoryList = nowDirectory.getDirectoryList();
+        DirectoryEntity homeDirectory = (DirectoryEntity) session.getAttribute("directory");
+        List<DirectoryEntity> directoryList = homeDirectory.getDirectoryList();
         User loginUser = (User) session.getAttribute("loginUser");
         if (fId == null || fId <= 0 || (directoryList != null && fId >= directoryList.size())) {
             //代表当前为根目录
             fId = 0;
         }
-        DirectoryEntity targetDirectory = directoryList.get(fId);
+        DirectoryEntity targetDirectory;
+        if (fId == 0)
+            targetDirectory = homeDirectory;
+        else
+            targetDirectory = directoryList.get(fId);
 
         //包含的子文件夹
         List<FileFolder> folders = new LinkedList<>();
@@ -72,8 +76,8 @@ public class IndexController extends BaseController {
         List<FileEntity> files = new LinkedList<>();
         //当前文件夹信息
         FileFolder nowFolder = new FileFolder(fId,
-                nowDirectory.getDirectoryName(),
-                nowDirectory.getDirectoryPath(),
+                homeDirectory.getDirectoryName(),
+                homeDirectory.getDirectoryPath(),
                 fId,
                 loginUser.getId(),
                 new Date());
@@ -89,6 +93,7 @@ public class IndexController extends BaseController {
                         fId,
                         loginUser.getId(),
                         new Date());
+                folders.add(fileFolder);
                 cnt++;
             }
         cnt = 0;
@@ -97,7 +102,7 @@ public class IndexController extends BaseController {
                 FileEntity file = new FileEntity(cnt,
                         s,
                         loginUser.getId(),
-                        nowDirectory.getDirectoryPath() + s,
+                        homeDirectory.getDirectoryPath() + s,
                         0,
                         new Date(),
                         fId,
@@ -105,6 +110,7 @@ public class IndexController extends BaseController {
                         FileUtil.getFileType(s),
                         s
                 );
+                files.add(file);
                 cnt++;
             }
         }

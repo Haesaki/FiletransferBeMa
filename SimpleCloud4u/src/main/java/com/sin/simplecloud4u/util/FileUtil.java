@@ -30,13 +30,13 @@ public class FileUtil {
 //            return FileType.IMAGE;
 //        return FileType.OTHER;
         if (name.contains(".pdf") || name.contains(".docx") || name.contains(".doc"))
-            return 0;
-        else if (name.contains(".mp3") || name.contains(".flac") || name.contains(".ogg") || name.contains(".m4a"))
             return 1;
-        else if (name.contains(".mp4") || name.contains(".av") || name.contains(".flv"))
-            return 2;
         else if (name.contains(".jpg") || name.contains(".png") || name.contains(".raw"))
+            return 2;
+        else if (name.contains(".mp4") || name.contains(".av") || name.contains(".flv"))
             return 3;
-        return 4;
+        else if (name.contains(".mp3") || name.contains(".flac") || name.contains(".ogg") || name.contains(".m4a"))
+            return 4;
+        return 5;
     }
 }
