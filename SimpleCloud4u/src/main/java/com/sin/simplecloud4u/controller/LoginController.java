@@ -1,5 +1,6 @@
 package com.sin.simplecloud4u.controller;
 
+import com.sin.simplecloud4u.model.entity.DirectoryEntity;
 import com.sin.simplecloud4u.model.entity.User;
 import com.sin.simplecloud4u.service.interfa.UserService;
 import com.sin.simplecloud4u.util.MailClient;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.File;
 import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
@@ -37,30 +39,18 @@ public class LoginController extends BaseController {
         this.stringRedisTemplate = redisTemplate;
     }
 
-    /**
-     * @return java.lang.String
-     * @Description 免登陆用户入口，用于本地开发测试，上线运营为了安全请删除此方法
-     **/
-    @GetMapping("/admin")
-    public String adminLogin(Model model) {
-        User user = new User();
-        user.setName("admin");
-        user.setPassword("admin");
-        user.setRole(true);
-        user.setEmail("admin");
-        user.setId(0);
-
-        logger.info("使用免登陆方式登录成功！" + user);
-        model.addAttribute("loginUser", user);
-        return "redirect:/user/index";
-    }
-
     @PostMapping("/login")
     public String login(User user, Map<String, Object> map) {
         User userDB = userService.selectUserByEmail(user.getEmail());
         if (userDB != null && userDB.getPassword().equals(user.getPassword())) {
             userDB.setPassword("");
             session.setAttribute("loginUser", userDB);
+            String directoryPath = fileDirectory + "/" + loginUser.getId();
+            File userDirectory = new File(directoryPath);
+            if (!userDirectory.exists())
+                userDirectory.mkdirs();
+            DirectoryEntity directory = new DirectoryEntity(directoryPath, true);
+            session.setAttribute("directory", directory);
             logger.info("登录成功！" + userDB);
             return "redirect:/user/index";
         } else {

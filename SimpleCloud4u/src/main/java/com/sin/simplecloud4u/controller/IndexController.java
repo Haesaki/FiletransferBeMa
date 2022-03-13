@@ -24,16 +24,7 @@ public class IndexController extends BaseController {
         if (loginUser == null)
             return "/";
 
-        //获得统计信息
-        String directoryPath = fileDirectory + "/" + loginUser.getId();
-
-        // 判断当前的用户是不是存在目录
-        File userDirectory = new File(directoryPath);
-        if (!userDirectory.exists())
-            userDirectory.mkdirs();
-
-        DirectoryEntity directory = new DirectoryEntity(directoryPath, true);
-        session.setAttribute("directory", directory);
+        DirectoryEntity directory = (DirectoryEntity) session.getAttribute("directory");
 
         FileStatistics fileStatistics = new FileStatistics();
         fileStatistics.MAX_SIZE = REGISTERED_STORAGE_MAX_SIZE;
@@ -76,9 +67,9 @@ public class IndexController extends BaseController {
         List<FileEntity> files = new LinkedList<>();
         //当前文件夹信息
         FileFolder nowFolder = new FileFolder(fId,
-                homeDirectory.getDirectoryName(),
-                homeDirectory.getDirectoryPath(),
-                fId,
+                targetDirectory.getDirectoryName(),
+                targetDirectory.getDirectoryPath(),
+                targetDirectory.getParentFolderId(),
                 loginUser.getId(),
                 new Date());
         //当前文件夹的相对路径

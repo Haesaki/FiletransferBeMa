@@ -43,6 +43,7 @@
     <div class="main-wrapper">
         <div class="navbar-bg"></div>
         <div th:replace="commons/bar::#top"></div>
+        <div th:replace="commons/bar::#sidebar(currUri='index')"></div>
         <div class="main-content">
             <section class="section">
                 <h1 class="section-header">
@@ -62,10 +63,6 @@
                                                 title="刷新"><i
                                                 class="icon ion-refresh"></i></a>
                                         </li>
-                                        <!-- <li th:each="l:${folders}" class="breadcrumb-item"><a-->
-                                        <!-- style="font-weight: bold"-->
-                                        <!-- th:href="@{/user/files(fId=${l.fileFolderId},filePath=${l.fileFolderPath})}"-->
-                                        <!-- th:text="${l.fileFolderName}"></a></li>-->
                                         <li th:if="${nowFolder.fileFolderId != 0}"
                                             class="breadcrumb-item active" aria-current="page"
                                             th:text="${nowFolder.fileFolderName}"></li>
@@ -84,10 +81,7 @@
                                                 <th></th>
                                                 <th>名称</th>
                                                 <th>类型</th>
-                                                <!--                                                <th>扩展名</th>-->
                                                 <th>大小</th>
-                                                <!--                                                <th>下载次数</th>-->
-                                                <!--                                                <th>上传时间</th>-->
                                             </tr>
                                             <tr th:each="folder:${folders}" class="files-items folders">
                                                 <td><span style="display: none" th:text="${folder.fileFolderId}"></span><i
@@ -101,7 +95,6 @@
                                                 <td style="font-weight: 300">文件夹</td>
                                                 <td style="font-weight: 300">-</td>
                                                 <td style="font-weight: 300">-</td>
-                                                <!--                                                <td style="font-weight: 300">-</td>-->
                                                 <td style="font-weight: 300"
                                                     th:text="${#dates.format(folder.time,'yyyy-MM-dd HH:mm')}"></td>
                                             </tr>
@@ -128,16 +121,10 @@
                                                 <td style="font-weight: 300" th:if="${f.type == 3}">视频</td>
                                                 <td style="font-weight: 300" th:if="${f.type == 4}">音乐</td>
                                                 <td style="font-weight: 300" th:if="${f.type == 5}">其他</td>
-                                                <!--                                                <td style="font-weight: 300" th:text="${f.postfix}"></td>-->
                                                 <td style="font-weight: 300" th:if="${f.size > 1024}"
                                                     th:text="${f.size/1024 +'MB'}"></td>
                                                 <td style="font-weight: 300" th:if="${f.size < 1024}"
                                                     th:text="${f.size +'KB'}"></td>
-                                                <!--                                                <td style="font-weight: 300" th:text="${f.downloadTime} + ' 次'"></td>-->
-                                                <!--                                                <td style="font-weight: 300"-->
-                                                <!--                                                    th:text="${#dates.format(f.uploadTime,'yyyy-MM-dd HH:mm')}">-->
-                                                <!--                                                    2020-02-02 15:08-->
-                                                <!--                                                </td>-->
                                             </tr>
                                         </table>
                                     </div>
@@ -171,9 +158,6 @@
         th:src="@{/js/lib/context-menu/js/jquery.contextMenu.min.js}"></script>
 <script src="../../static/js/lib/xcConfirm/js/xcConfirm.js"
         th:src="@{/js/lib/xcConfirm/js/xcConfirm.js}"></script>
-
-<script src="../../static/modules/jquery.min.js"
-        th:src="@{/modules/jquery.min.js}"></script>
 <script src="../../static/modules/popper.js"
         th:src="@{/modules/popper.js}"></script>
 <script src="../../static/modules/tooltip.js"

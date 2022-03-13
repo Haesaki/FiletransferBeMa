@@ -35,6 +35,11 @@ public class DirectoryEntity {
     // directory id
     private List<DirectoryEntity> directoryList;
 
+    // FolderId
+    private Integer folderId;
+    // parentID
+    private Integer parentFolderId;
+
     private DirectoryEntity() {
     }
 
@@ -52,6 +57,8 @@ public class DirectoryEntity {
 
         this.fileCount = 0;
         this.directoryCount = 0;
+        this.folderId = 0;
+        this.parentFolderId = 0;
 
         this.directoryName = directory.getName();
         this.subDirectory = new LinkedList<>();
@@ -67,7 +74,7 @@ public class DirectoryEntity {
     }
 
     // 不是主目录 不会初始化TrieTree, 初始化需要从上级传入TrieTree类,以便索引文件名
-    public DirectoryEntity(String directoryPath, TrieTree root) {
+    public DirectoryEntity(String directoryPath, Integer folderId, Integer parentFolderId, TrieTree root) {
         File directory = new File(directoryPath);
         if (!directory.exists() || !directory.isDirectory()) return;
         // 如果路径末尾没有/ 就添加的链接的末尾
@@ -78,6 +85,8 @@ public class DirectoryEntity {
 
         this.fileCount = 0;
         this.directoryCount = 0;
+        this.folderId = folderId;
+        this.parentFolderId = parentFolderId;
 
         this.directoryName = directory.getName();
         this.subDirectory = new LinkedList<>();
@@ -95,7 +104,10 @@ public class DirectoryEntity {
                 File subFile = new File(directoryPath + s);
                 if (subFile.isDirectory()) {
                     this.directoryCount++;
-                    DirectoryEntity directoryEntity = new DirectoryEntity(directoryPath + s, root);
+                    DirectoryEntity directoryEntity = new DirectoryEntity(directoryPath + s,
+                            this.folderId + this.subDirectory.size(),
+                            this.folderId,
+                            root);
                     this.directoryCount += directoryEntity.directoryCount;
                     this.fileCount += directoryEntity.fileCount;
 

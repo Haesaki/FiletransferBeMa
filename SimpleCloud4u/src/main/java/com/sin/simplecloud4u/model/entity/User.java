@@ -15,24 +15,29 @@ public class User {
 
     private String password;
 
-    @Value("${sc4u.account.directory-default-path:/sc4u/user/}")
-    private String directoryPath;
-
     // false 普通用户 true admin
     private boolean role;
 
-    public User(){}
+    @Value("${sc4u.account.directory-default-path:/sc4u/user/}")
+    private String directoryPath;
+
+    public User() {
+    }
 
     public User(String name, String password) {
         this.name = name;
         this.password = password;
     }
 
-    public boolean createDirectory(){
+    public boolean createDirectory() {
         File directory = new File(directoryPath);
         if (!directory.exists()) {
             directory.mkdirs();
         }
         return true;
+    }
+
+    public boolean getRole() {
+        return role;
     }
 }

@@ -1,11 +1,14 @@
 package com.sin.simplecloud4u.controller;
 
+import com.sin.simplecloud4u.model.entity.DirectoryEntity;
+import com.sin.simplecloud4u.model.entity.User;
 import com.sin.simplecloud4u.util.RandomUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -103,8 +106,33 @@ public class FileController extends BaseController {
     @ResponseBody
     public Map<String, Object> uploadFile(@RequestParam("file") MultipartFile file) {
         Map<String, Object> map = new HashMap<>();
+
+        User loginUser = (User) session.getAttribute("loginUser");
+        // 如果没有登录 或者不是admin的话，就直接退出
+        if (loginUser == null || !loginUser.getRole()){
+            map.put("code", 404);
+            return map;
+        }
+
+        DirectoryEntity directory = (DirectoryEntity) session.getAttribute("directory");
         String fileName = file.getOriginalFilename();
         return map;
+    }
+
+    /**
+     * 网盘的文件下载
+     **/
+    @GetMapping("/downloadFile")
+    public String downloadFile(@RequestParam Integer fId){
+        User loginUser = (User) session.getAttribute("loginUser");
+        // 如果没有登录 或者不是admin的话，就直接退出
+        if (loginUser == null || !loginUser.getRole()){
+            logger.error("用户没有下载文件的权限!下载失败...");
+            return "redirect:/error401Page";
+        }
+
+        //获取文件信息
+        return "success";
     }
 
     // 正则验证文件名是否合法 [汉字,字符,数字,下划线,英文句号,横线]
