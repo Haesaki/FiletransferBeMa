@@ -6,7 +6,12 @@ import com.sin.simplecloud4u.util.RandomUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,9 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
@@ -109,7 +112,7 @@ public class FileController extends BaseController {
 
         User loginUser = (User) session.getAttribute("loginUser");
         // 如果没有登录 或者不是admin的话，就直接退出
-        if (loginUser == null || !loginUser.getRole()){
+        if (loginUser == null || !loginUser.getRole()) {
             map.put("code", 404);
             return map;
         }
@@ -123,16 +126,20 @@ public class FileController extends BaseController {
      * 网盘的文件下载
      **/
     @GetMapping("/downloadFile")
-    public String downloadFile(@RequestParam Integer fId){
+    public ResponseEntity<Resource> downloadFile(@RequestParam String filePath) throws FileNotFoundException {
         User loginUser = (User) session.getAttribute("loginUser");
+        File downloadFile = new File(filePath);
         // 如果没有登录 或者不是admin的话，就直接退出
-        if (loginUser == null || !loginUser.getRole()){
+        if (loginUser == null || !loginUser.getRole() || !downloadFile.exists()) {
             logger.error("用户没有下载文件的权限!下载失败...");
-            return "redirect:/error401Page";
+            return null;
         }
-
-        //获取文件信息
-        return "success";
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(downloadFile));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + downloadFile.getName() + "\"")
+                .contentLength(downloadFile.length())
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
     }
 
     // 正则验证文件名是否合法 [汉字,字符,数字,下划线,英文句号,横线]

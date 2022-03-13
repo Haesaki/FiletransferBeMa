@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no"
           name="viewport">
-    <title>莫提网盘-我的文件</title>
+    <title>Simple Cloud - 我的文件</title>
 
     <link rel="stylesheet" href="../../static/modules/bootstrap/css/bootstrap.min.css"
           th:href="@{/modules/bootstrap/css/bootstrap.min.css}">
@@ -185,6 +185,14 @@
 <script src="../../static/modules/chart.min.js"
         th:src="@{/modules/chart.min.js}"></script>
 <script>
+
+    // function download(id) {
+    //     let filePath = [[${files.get(id).getMyFilePath()}]]
+    //     let location = window.location.href;
+    //     let strings = location.split("moti-cloud");
+    //     window.location.href = strings[0] + "/downloadFile?filePath=" + filePath;
+    // }
+
     $(function () {
         $('.folders').dblclick(function () {
             let id = $(this).children("td").children("span").html();
@@ -414,8 +422,8 @@
     }
 
     function checkUpdateFile() {
-        var name = $.trim($("#updateFileName").val());
-        var nameReg = /^[^\u4E00-\u9FA5\uF900-\uFA2D\w-_]{2,20}$/;
+        let name = $.trim($("#updateFileName").val());
+        let nameReg = /^[^\u4E00-\u9FA5\uF900-\uFA2D\w-_]{2,20}$/;
         if (!nameReg.test(name)) {
             alert("文件夹格式错误！【汉字、字母、数字】");
             var location = window.location.href;
