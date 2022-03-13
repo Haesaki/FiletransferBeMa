@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 public class DirectoryEntityTest {
     @Test
     public void directoryFindTest() {
-        String directoryPath = "C:\\Users\\laoha\\IdeaProjects\\filetransferbema\\SimpleCloud4u";
+        String directoryPath = "C:\\Users\\laoha\\IdeaProjects\\filetransferbema\\SimpleCloud4u\\src\\main\\java\\com\\sin\\simplecloud4u";
         DirectoryEntity directory = new DirectoryEntity(directoryPath, true);
         iteratorOutputFileTree(directory, 0);
     }

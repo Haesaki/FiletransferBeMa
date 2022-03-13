@@ -4,10 +4,8 @@ import com.sin.simplecloud4u.util.TrieTree;
 import lombok.Data;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 @Data
 public class DirectoryEntity {
@@ -28,6 +26,18 @@ public class DirectoryEntity {
     // 方便后面进行搜索操作
     private TrieTree wordTree;
 
+    // 文件统计数目
+    private Integer fileCount;
+
+    // 目录统计数目
+    private Integer directoryCount;
+
+    // directory id
+    private List<DirectoryEntity> directoryList;
+
+    private DirectoryEntity() {
+    }
+
     // 只负责索引文件功能，不具备修改文件以及其他修改的操作
     // 传入的地址必须要求存在该目录
     // 只有初始化为主目录的才会初始化TrieTree
@@ -40,12 +50,18 @@ public class DirectoryEntity {
         else
             this.directoryPath = directoryPath + "/";
 
+        this.fileCount = 0;
+        this.directoryCount = 0;
+
         this.directoryName = directory.getName();
         this.subDirectory = new LinkedList<>();
         this.files = new LinkedList<>();
         this.isHome = isHome;
-        if (isHome)
+        this.directoryList = new LinkedList<>();
+        if (isHome) {
             this.wordTree = new TrieTree();
+            this.directoryList.add(new DirectoryEntity());
+        }
         // 每当初初始化一个目录实体的时候，会自动去扫描该目录下的全部文件
         this.iterateDirectory(wordTree);
     }
@@ -60,9 +76,13 @@ public class DirectoryEntity {
         else
             this.directoryPath = directoryPath + "/";
 
+        this.fileCount = 0;
+        this.directoryCount = 0;
+
         this.directoryName = directory.getName();
         this.subDirectory = new LinkedList<>();
         this.files = new LinkedList<>();
+        this.directoryList = new LinkedList<>();
         // 每当初初始化一个目录实体的时候，会自动去扫描该目录下的全部文件
         this.iterateDirectory(root);
     }
@@ -70,16 +90,26 @@ public class DirectoryEntity {
     public void iterateDirectory(TrieTree root) {
         File directory = new File(directoryPath);
         String[] sub = directory.list();
-        if (sub != null)
+        if (sub != null) {
             for (String s : sub) {
                 File subFile = new File(directoryPath + s);
                 if (subFile.isDirectory()) {
+                    this.directoryCount++;
                     DirectoryEntity directoryEntity = new DirectoryEntity(directoryPath + s, root);
+                    this.directoryCount += directoryEntity.directoryCount;
+                    this.fileCount += directoryEntity.fileCount;
+
+                    directoryList.add(directoryEntity);
                     subDirectory.add(directoryEntity);
                 } else {
+                    this.fileCount++;
                     files.add(s);
                     root.insert(s, directoryPath + s);
                 }
             }
+            for (DirectoryEntity directoryEntity : subDirectory) {
+                directoryList.addAll(directoryEntity.getDirectoryList());
+            }
+        }
     }
 }

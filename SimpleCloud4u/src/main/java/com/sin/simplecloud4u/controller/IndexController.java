@@ -1,14 +1,16 @@
 package com.sin.simplecloud4u.controller;
 
-import com.sin.simplecloud4u.model.entity.DirectoryEntity;
-import com.sin.simplecloud4u.model.entity.FileStatistics;
-import com.sin.simplecloud4u.model.entity.User;
+import com.sin.simplecloud4u.model.entity.*;
+import com.sin.simplecloud4u.util.FileUtil;
+import org.apache.tomcat.jni.Directory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.io.File;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -30,11 +32,13 @@ public class IndexController extends BaseController {
         if (!userDirectory.exists())
             userDirectory.mkdirs();
 
-        DirectoryEntity directory = new DirectoryEntity("", true);
+        DirectoryEntity directory = new DirectoryEntity(directoryPath, true);
         session.setAttribute("directory", directory);
 
         FileStatistics fileStatistics = new FileStatistics();
-        fileStatistics.MAX_SIZE = REGISTERED_FILE_MAX_SIZE;
+        fileStatistics.MAX_SIZE = REGISTERED_STORAGE_MAX_SIZE;
+        fileStatistics.fileCount = directory.getFileCount();
+        fileStatistics.folderCount = directory.getDirectoryCount();
 
         map.put("statistics", fileStatistics);
 
@@ -43,9 +47,72 @@ public class IndexController extends BaseController {
     }
 
     @GetMapping("/user/files")
-    public String getFileDirectory(Model model) {
-        User user = (User) session.getAttribute("loginUser");
+    public String getFileDirectory(Integer fId, String filePath, Integer error, Map<String, Object> map) {
+        //判断是否包含错误信息
+        if (error != null) {
+            if (error == 1) {
+                map.put("error", "添加失败！当前已存在同名文件夹");
+            }
+            if (error == 2) {
+                map.put("error", "重命名失败！文件夹已存在");
+            }
+        }
+        DirectoryEntity nowDirectory = (DirectoryEntity) session.getAttribute("directory");
+        List<DirectoryEntity> directoryList = nowDirectory.getDirectoryList();
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (fId == null || fId <= 0 || (directoryList != null && fId >= directoryList.size())) {
+            //代表当前为根目录
+            fId = 0;
+        }
+        DirectoryEntity targetDirectory = directoryList.get(fId);
 
+        //包含的子文件夹
+        List<FileFolder> folders = new LinkedList<>();
+        //包含的文件
+        List<FileEntity> files = new LinkedList<>();
+        //当前文件夹信息
+        FileFolder nowFolder = new FileFolder(fId,
+                nowDirectory.getDirectoryName(),
+                nowDirectory.getDirectoryPath(),
+                fId,
+                loginUser.getId(),
+                new Date());
+        //当前文件夹的相对路径
+        List<FileFolder> location = new LinkedList<>();
+
+        int cnt = 1;
+        if (targetDirectory.getSubDirectory() != null)
+            for (DirectoryEntity directory : targetDirectory.getSubDirectory()) {
+                FileFolder fileFolder = new FileFolder(fId + cnt,
+                        directory.getDirectoryName(),
+                        directory.getDirectoryPath(),
+                        fId,
+                        loginUser.getId(),
+                        new Date());
+                cnt++;
+            }
+        cnt = 0;
+        if (targetDirectory.getFiles() != null) {
+            for (String s : targetDirectory.getFiles()) {
+                FileEntity file = new FileEntity(cnt,
+                        s,
+                        loginUser.getId(),
+                        nowDirectory.getDirectoryPath() + s,
+                        0,
+                        new Date(),
+                        fId,
+                        0,
+                        FileUtil.getFileType(s),
+                        s
+                );
+                cnt++;
+            }
+        }
+
+        map.put("folders", folders);
+        map.put("files", files);
+        map.put("nowFolder", nowFolder);
+        map.put("location", location);
         return "/user/files";
     }
 }
