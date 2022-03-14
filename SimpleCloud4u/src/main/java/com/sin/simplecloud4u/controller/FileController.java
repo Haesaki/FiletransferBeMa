@@ -1,6 +1,7 @@
 package com.sin.simplecloud4u.controller;
 
 import com.sin.simplecloud4u.model.entity.DirectoryEntity;
+import com.sin.simplecloud4u.model.entity.FileEntity;
 import com.sin.simplecloud4u.model.entity.User;
 import com.sin.simplecloud4u.util.RandomUtil;
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -76,7 +78,7 @@ public class FileController extends BaseController {
         redisTemplate.opsForValue().set("sf2_" + file.getOriginalFilename(), code);
 
         // 创建文件
-        if (!allowedToCreateFile(file)) {
+        if (!allowedToCreateFile(file, fileDirectory + tempFilePath + file.getOriginalFilename())) {
             attributes.addFlashAttribute("error", "创建文件出错");
         } else {
             url = url + "/file/share?name=" + Base64.getEncoder().encodeToString(Objects.requireNonNull(file.getOriginalFilename()).getBytes(StandardCharsets.UTF_8)) + "&flag=2";
@@ -87,8 +89,8 @@ public class FileController extends BaseController {
     }
 
     // 刚刚上传了一份文件 链接 url -> http://127.0.0.1:7777/sc4u/file/share?name=d2FsbGhhdmVuLThva3kxai5qcGc=&flag=2
-    private boolean allowedToCreateFile(@RequestParam("file") MultipartFile file) {
-        File uploadFile = new File(fileDirectory + tempFilePath + file.getOriginalFilename());
+    private boolean allowedToCreateFile(@RequestParam("file") MultipartFile file, String path) {
+        File uploadFile = new File(path);
         try {
             if (!uploadFile.createNewFile())
                 return false;
@@ -105,30 +107,28 @@ public class FileController extends BaseController {
     /**
      * 网盘的文件上传
      **/
-    @PostMapping("/uploadFile")
-    @ResponseBody
-    public Map<String, Object> uploadFile(@RequestParam("file") MultipartFile file) {
-        Map<String, Object> map = new HashMap<>();
-
+    @PostMapping("/user/files")
+    public String uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("uploadFolderPath") String uploadFolderPath, @RequestParam("folderId") int folderId, Model model) {
         User loginUser = (User) session.getAttribute("loginUser");
-        // 如果没有登录 或者不是admin的话，就直接退出
-        if (loginUser == null || !loginUser.getRole()) {
-            map.put("code", 404);
-            return map;
-        }
 
-        DirectoryEntity directory = (DirectoryEntity) session.getAttribute("directory");
-        String fileName = file.getOriginalFilename();
-        return map;
+        // 如果没有登录 或者不是admin的话，或者创建文件失败，就直接退出
+        if (loginUser == null || !loginUser.getRole() || !allowedToCreateFile(file, uploadFolderPath + file.getOriginalFilename())) {
+            model.addAttribute("error", "没有权限 / 创建文件过程存在错误");
+            return "redirect:/error404Page";
+        }
+        DirectoryEntity homeDirectory = new DirectoryEntity(fileDirectory + loginUser.getId(), true);
+        session.setAttribute("directory", homeDirectory);
+
+        return "redirect:/user/files?fId=" + folderId;
     }
 
     /**
      * 网盘的文件下载
      **/
     @GetMapping("/downloadFile")
-    public ResponseEntity<Resource> downloadFile(@RequestParam String filePath) throws FileNotFoundException {
+    public ResponseEntity<Resource> downloadFile(@RequestParam String folderPath, @RequestParam String fileName) throws FileNotFoundException {
         User loginUser = (User) session.getAttribute("loginUser");
-        File downloadFile = new File(filePath);
+        File downloadFile = new File(folderPath + fileName);
         // 如果没有登录 或者不是admin的话，就直接退出
         if (loginUser == null || !loginUser.getRole() || !downloadFile.exists()) {
             logger.error("用户没有下载文件的权限!下载失败...");
@@ -140,6 +140,39 @@ public class FileController extends BaseController {
                 .contentLength(downloadFile.length())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
+    }
+
+    /*
+     * 删除文件
+     */
+    @GetMapping("/deleteFile")
+    public String deleteFile(@RequestParam Integer fId, Integer folder) {
+        return "redirect:/files?fId=" + folder;
+    }
+
+    /*
+     * 删除文件夹
+     */
+    @GetMapping("/deleteFolder")
+    public String deleteFolder(@RequestParam Integer fId) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        DirectoryEntity homeDirectory = (DirectoryEntity) session.getAttribute("directory");
+        if (homeDirectory.getDirectoryList().size() <= fId || loginUser == null || !loginUser.getRole())
+            return "redirect:/error404Page";
+        DirectoryEntity subDirectory = homeDirectory.getDirectoryList().get(fId);
+        return "redirect:/files?fId=" + subDirectory.getParentFolderId();
+    }
+
+    /*
+     * 添加文件夹
+     */
+    @PostMapping("/addFolder")
+    public String addFolder(String folderName, int fId, Model model) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        DirectoryEntity homeDirectory = (DirectoryEntity) session.getAttribute("directory");
+        if (homeDirectory.getDirectoryList().size() <= fId || loginUser == null || !loginUser.getRole())
+            return "redirect:/error404Page";
+        return "redirect:/files?fId=" + fId;
     }
 
     // 正则验证文件名是否合法 [汉字,字符,数字,下划线,英文句号,横线]
