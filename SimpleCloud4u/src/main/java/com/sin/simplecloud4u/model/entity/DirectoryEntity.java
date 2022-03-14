@@ -18,6 +18,9 @@ public class DirectoryEntity {
     // 只保存文件名字 不是文件的路径
     private List<String> files;
 
+    // 文件大小, 大小为KB
+    private List<Integer> fileSize;
+
     // 如果是主目录的话
     // 我们需要利用hash函数记录全部的文件 方便后续索引
     private boolean isHome;
@@ -63,6 +66,7 @@ public class DirectoryEntity {
         this.directoryName = directory.getName();
         this.subDirectory = new LinkedList<>();
         this.files = new LinkedList<>();
+        this.fileSize = new LinkedList<>();
         this.isHome = isHome;
         this.directoryList = new LinkedList<>();
         if (isHome) {
@@ -91,6 +95,7 @@ public class DirectoryEntity {
         this.directoryName = directory.getName();
         this.subDirectory = new LinkedList<>();
         this.files = new LinkedList<>();
+        this.fileSize = new LinkedList<>();
         this.directoryList = new LinkedList<>();
         // 每当初初始化一个目录实体的时候，会自动去扫描该目录下的全部文件
         this.iterateDirectory(root);
@@ -116,6 +121,9 @@ public class DirectoryEntity {
                 } else {
                     this.fileCount++;
                     files.add(s);
+                    long fileSizeB = new File(directoryPath + s).length();
+                    int size = (int) (fileSizeB / 1024);
+                    fileSize.add(size);
                     root.insert(s, directoryPath + s);
                 }
             }

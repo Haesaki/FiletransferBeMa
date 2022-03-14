@@ -89,6 +89,7 @@ public class IndexController extends BaseController {
             }
         cnt = 0;
         if (targetDirectory.getFiles() != null) {
+            List<Integer> size = targetDirectory.getFileSize();
             for (String s : targetDirectory.getFiles()) {
                 FileEntity file = new FileEntity(cnt,
                         s,
@@ -97,7 +98,7 @@ public class IndexController extends BaseController {
                         0,
                         new Date(),
                         fId,
-                        0,
+                        size.get(cnt),
                         FileUtil.getFileType(s),
                         s
                 );

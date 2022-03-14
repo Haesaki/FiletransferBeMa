@@ -95,9 +95,6 @@
                                                 </td>
                                                 <td style="font-weight: 300">文件夹</td>
                                                 <td style="font-weight: 300">-</td>
-                                                <td style="font-weight: 300">-</td>
-                                                <td style="font-weight: 300"
-                                                    th:text="${#dates.format(folder.time,'yyyy-MM-dd HH:mm')}"></td>
                                             </tr>
                                             <tr th:each="f:${files}" class="files-items files" onclick="download()">
                                                 <td><span style="display: none" th:text="${f.myFileId}"></span>
@@ -229,14 +226,18 @@
             {
                 text: " 分享",
                 callback: function () {
-                    var location = window.location.href;
-                    let strings = location.split("sc4u");
+                    let fileId = $('#tarFile').html();
+                    let folderPath = $('#folderPath').html();
+
+                    let location = window.location.href;
+                    let strings = location.split("files");
+                    console.log("getQrCode/?id=" + $('#tarFile').html() + "&url=" + strings[0] + "sc4u")
                     $.ajax({
-                        url: "getQrCode/?id=" + $('#tarFile').html() + "&url=" + strings[0] + "sc4u",
+                        url: "strings[0]/share/file?folderPath="+folderPath+"&fileId="+fileId,
                         type: "get",
                         async: false,
                         success: function (data) {
-                            var txt = "<img src='" + data['imgPath'] + "' style='width: 150px;height: 150px'/><br>" +
+                            var txt = "<img src='" + data['  '] + "' style='width: 150px;height: 150px'/><br>" +
                                 "<input style='width: 80%;font-size: 14px' value='" + data['url'] + "'/>";
                             var option = {
                                 title: "分享你的文件",
@@ -250,10 +251,11 @@
                 text: " 删除",
                 callback: function () {
                     let id = $('#tarFile').html();
-                    var location = window.location.href;
-                    let strings = location.split("sc4u");
+                    // var -> let
+                    let location = window.location.href;
+                    let strings = location.split("files");
                     if (id != "") {
-                        window.location.href = strings[0] + "sc4u/deleteFile?fId=" + id + "&folder=" + $('#nowF').html();
+                        window.location.href = strings[0] + "deleteFile?fileId=" + id + "&folderId=" + $('#nowF').html();
                     } else {
                         return;
                     }
@@ -301,10 +303,10 @@
                 text: " 清空并删除",
                 callback: function () {
                     let id = $('#tarFolder').html();
-                    var location = window.location.href;
-                    let strings = location.split("sc4u");
+                    let location = window.location.href;
+                    let strings = location.split("files");
                     if (id != "") {
-                        window.location.href = strings[0] + "sc4u/deleteFolder?fId=" + id;
+                        window.location.href = strings[0] + "deleteFolder?fId=" + id;
                     } else {
                         return;
                     }
@@ -352,12 +354,14 @@
     }
 
     function addFolderElement() {
-        var now = $('#nowF').html();
+        let currFolderId = $('#nowF').html();
+        let folderPath = $('#folderPath').html();
         $("<tr class='files-items folders'><td><i style='font-size: 24px;color: orange' class='icon ion-android-folder'></i></td>" +
             "<td>" +
             "<form id='addFolderForm' action='addFolder' method='post'>" +
-            "<input id='newFolder'  autocomplete='off' name='fileFolderName' type='text' onblur='checkAddFolder()'>" +
-            "<input type='hidden' name='parentFolderId' value='" + now + "'>" +
+            "<input id='newFolder'  autocomplete='off' name='folderName' type='text' onblur='checkAddFolder()'>" +
+            "<input type='hidden' name='folderPath' value='" + folderPath + "'>" +
+            "<input type='hidden' name='parentFolderId' value='" + currFolderId + "'>" +
             "</form>" +
             "</td>" +
             "<td style='font-weight: 300'>文件夹</td>" +
@@ -391,18 +395,6 @@
             window.location.href = location;
         } else {
             $('#addFolderForm').submit();
-        }
-    }
-
-    function checkUpdateFolder() {
-        var name = $.trim($("#updateFolderName").val());
-        var nameReg = /^[\u4E00-\u9FA5A-Za-z0-9]{2,20}$/;
-        if (!nameReg.test(name)) {
-            alert("文件夹格式错误！【汉字、字母、数字】");
-            var location = window.location.href;
-            window.location.href = location;
-        } else {
-            $('#updateFolderForm').submit();
         }
     }
 

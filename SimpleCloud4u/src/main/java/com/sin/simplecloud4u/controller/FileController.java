@@ -46,8 +46,7 @@ public class FileController extends BaseController {
     @PostMapping("/uploadTempFile")
     public String uploadTempFile(@RequestParam("file") MultipartFile file, String url, RedirectAttributes attributes) {
         File tempDirectory = new File(fileDirectory + tempFilePath);
-        if (!tempDirectory.exists())
-            tempDirectory.mkdirs();
+        if (!tempDirectory.exists()) tempDirectory.mkdirs();
 
         if (Boolean.TRUE.equals(redisTemplate.opsForSet().isMember("tempFIle", file.getName()))) {
             return "redirect:/error404Page";
@@ -63,8 +62,7 @@ public class FileController extends BaseController {
         if (session.getAttribute("user") == null) {
             if (fileSize > VISITOR_MAX_FILE)
                 attributes.addFlashAttribute("msg", "您的文件超出了文件上传大小的限制，请尝试上传小于" + VISITOR_MAX_FILE + "bits 的文件!!");
-            else
-                logger.info("Not Login " + remoteAddr + " upload " + file.getOriginalFilename() + "-" + fileSize);
+            else logger.info("Not Login " + remoteAddr + " upload " + file.getOriginalFilename() + "-" + fileSize);
         } else {
             if (fileSize > REGISTERED_MAX_FILE)
                 attributes.addFlashAttribute("msg", "您的文件超出了文件上传大小的限制，请尝试上传小于" + VISITOR_MAX_FILE + "bits 的文件!!");
@@ -92,8 +90,7 @@ public class FileController extends BaseController {
     private boolean allowedToCreateFile(@RequestParam("file") MultipartFile file, String path) {
         File uploadFile = new File(path);
         try {
-            if (!uploadFile.createNewFile())
-                return false;
+            if (!uploadFile.createNewFile()) return false;
             FileOutputStream fileOutputStream = new FileOutputStream(uploadFile);
             fileOutputStream.write(file.getBytes());
             fileOutputStream.close();
@@ -135,44 +132,127 @@ public class FileController extends BaseController {
             return null;
         }
         InputStreamResource resource = new InputStreamResource(new FileInputStream(downloadFile));
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + downloadFile.getName() + "\"")
-                .contentLength(downloadFile.length())
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(resource);
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + downloadFile.getName() + "\"").contentLength(downloadFile.length()).contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
     }
 
     /*
      * 删除文件
      */
-    @GetMapping("/deleteFile")
-    public String deleteFile(@RequestParam Integer fId, Integer folder) {
-        return "redirect:/files?fId=" + folder;
+    @GetMapping("/user/deleteFile")
+    public String deleteFile(@RequestParam Integer fileId, Integer folderId, Model model) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        DirectoryEntity homeDirectory = (DirectoryEntity) session.getAttribute("directory");
+        // 如果没有登录 或者不是admin的话，或者创建文件失败，就直接退出
+        if (loginUser == null || !loginUser.getRole() || folderId >= homeDirectory.getDirectoryList().size()) {
+            model.addAttribute("error", "没有权限 / 创建文件过程存在错误");
+            return "redirect:/error404Page";
+        }
+
+        DirectoryEntity nowDirectory;
+        if (folderId == 0) nowDirectory = homeDirectory;
+        else nowDirectory = homeDirectory.getDirectoryList().get(folderId);
+
+        String folderPath = nowDirectory.getDirectoryPath();
+        if (nowDirectory.getFiles() == null) return "redirect:/error404Page";
+        String fileName = nowDirectory.getFiles().get(fileId);
+        File file = new File(folderPath + fileName);
+
+        if (!file.exists() || !file.isFile() || !file.delete()) return "redirect:/error404Page";
+
+        homeDirectory = new DirectoryEntity(fileDirectory + loginUser.getId(), true);
+        session.setAttribute("directory", homeDirectory);
+
+        return "redirect:/user/files?fId=" + folderId;
     }
 
     /*
      * 删除文件夹
      */
-    @GetMapping("/deleteFolder")
-    public String deleteFolder(@RequestParam Integer fId) {
+    @GetMapping("/user/deleteFolder")
+    public String deleteFolder(@RequestParam(value = "fId") Integer fId) {
         User loginUser = (User) session.getAttribute("loginUser");
         DirectoryEntity homeDirectory = (DirectoryEntity) session.getAttribute("directory");
         if (homeDirectory.getDirectoryList().size() <= fId || loginUser == null || !loginUser.getRole())
             return "redirect:/error404Page";
-        DirectoryEntity subDirectory = homeDirectory.getDirectoryList().get(fId);
-        return "redirect:/files?fId=" + subDirectory.getParentFolderId();
+
+        DirectoryEntity subDirectory;
+        if (fId == 0) subDirectory = homeDirectory;
+        else subDirectory = homeDirectory.getDirectoryList().get(fId);
+
+        File subD = new File(subDirectory.getDirectoryPath());
+        if (!subD.exists() || !subD.isDirectory() || !deleteDirectory(subDirectory.getDirectoryPath()))
+            return "redirect:/error404Page";
+
+        homeDirectory = new DirectoryEntity(fileDirectory + loginUser.getId(), true);
+        session.setAttribute("directory", homeDirectory);
+
+        return "redirect:/user/files?fId=" + subDirectory.getParentFolderId();
+    }
+
+    /**
+     * 删除目录（文件夹）以及目录下的文件
+     *
+     * @param sPath 被删除目录的文件路径
+     * @return 目录删除成功返回true，否则返回false
+     */
+    public boolean deleteDirectory(String sPath) {
+        //如果sPath不以文件分隔符结尾，自动添加文件分隔符
+        if (!sPath.endsWith(File.separator)) {
+            sPath = sPath + File.separator;
+        }
+        File dirFile = new File(sPath);
+        //如果dir对应的文件不存在，或者不是一个目录，则退出
+        if (!dirFile.exists() || !dirFile.isDirectory()) {
+            return false;
+        }
+        boolean flag = true;
+        //删除文件夹下的所有文件(包括子目录)
+        File[] files = dirFile.listFiles();
+        assert files != null;
+        for (File file : files) {
+            //删除子文件
+            if (file.isFile()) {
+                File deleteFile = new File(file.getAbsolutePath());
+                flag = deleteFile.delete();
+                if (!flag) break;
+            } //删除子目录
+            else {
+                flag = deleteDirectory(file.getAbsolutePath());
+                if (!flag) break;
+            }
+        }
+        if (!flag) return false;
+        //删除当前目录
+        if (dirFile.delete()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /*
      * 添加文件夹
      */
-    @PostMapping("/addFolder")
-    public String addFolder(String folderName, int fId, Model model) {
+    @PostMapping("/user/addFolder")
+    public String addFolder(@RequestParam(value = "folderName", required = true) String folderName, @RequestParam(value = "folderPath", required = true) String folderPath, @RequestParam(value = "parentFolderId", required = true) Integer parentFolderId, Model model) {
         User loginUser = (User) session.getAttribute("loginUser");
-        DirectoryEntity homeDirectory = (DirectoryEntity) session.getAttribute("directory");
-        if (homeDirectory.getDirectoryList().size() <= fId || loginUser == null || !loginUser.getRole())
-            return "redirect:/error404Page";
-        return "redirect:/files?fId=" + fId;
+        if (loginUser == null || !loginUser.getRole()) return "redirect:/error404Page";
+
+        File newFolder = new File(folderPath + folderName);
+        if (!newFolder.mkdirs()) return "redirect:/error404Page";
+
+        DirectoryEntity homeDirectory = new DirectoryEntity(fileDirectory + loginUser.getId(), true);
+        session.setAttribute("directory", homeDirectory);
+
+        return "redirect:/user/files?fId=" + parentFolderId;
+    }
+
+    // http://localhost:7777/user/getQrCode/?id=0&url=http://localhost:7777/user/sc4u
+    // share
+    @GetMapping("/user/share/file")
+    public String userShareFile() {
+        return "redirect:/error400Page";
+        //
     }
 
     // 正则验证文件名是否合法 [汉字,字符,数字,下划线,英文句号,横线]
