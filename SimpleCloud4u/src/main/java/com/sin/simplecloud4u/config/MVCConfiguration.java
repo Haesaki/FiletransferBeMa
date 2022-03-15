@@ -1,6 +1,7 @@
 package com.sin.simplecloud4u.config;
 
 import com.sin.simplecloud4u.interceptor.LoginHandlerInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.server.ErrorPage;
 import org.springframework.boot.web.server.ErrorPageRegistrar;
@@ -8,13 +9,18 @@ import org.springframework.boot.web.server.ErrorPageRegistry;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.unit.DataSize;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.servlet.MultipartConfigElement;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class MVCConfiguration implements WebMvcConfigurer, ErrorPageRegistrar {
@@ -24,6 +30,9 @@ public class MVCConfiguration implements WebMvcConfigurer, ErrorPageRegistrar {
 
     @Value("sc4u.account.registered.max-file-size")
     private static int MAX_REQUEST_SIZE;
+
+    @Autowired
+    StringRedisTemplate redisTemplate;
 
 
     @Bean
@@ -62,6 +71,23 @@ public class MVCConfiguration implements WebMvcConfigurer, ErrorPageRegistrar {
                         "/asserts/**", "/**/*.css", "/**/*.js", "/**/*.png ", "/**/*.jpg",
                         "/**/*.jpeg", "/**/*.gif", "/**/fonts/*", "/**/*.svg",
                         "/sc4u/file/share");
+        registry.addInterceptor(new HandlerInterceptor() {
+            @Override
+            public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+                String sourceIpAddress = request.getRemoteAddr();
+                String accessCount = redisTemplate.opsForValue().getAndDelete("accessCnt" + sourceIpAddress);
+
+                int cnt = 0;
+                if (accessCount != null)
+                    cnt = Integer.parseInt(accessCount);
+                if (cnt > 50)
+                    return false;
+                cnt++;
+                redisTemplate.opsForValue().set("accessCnt" + sourceIpAddress, String.valueOf(cnt), 1, TimeUnit.MINUTES);
+
+                return HandlerInterceptor.super.preHandle(request, response, handler);
+            }
+        });
     }
 
     /**

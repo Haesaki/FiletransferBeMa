@@ -33,9 +33,9 @@ public class ShareFileController extends BaseController {
     }
 
     @GetMapping("/sc4u/file/share")
-    public String getFileRequest(@RequestParam(value = "name", required = true) String na,
-                                 @RequestParam(value = "flag", required = true) int flag,
-                                 Model model) {
+    public String getTempShareFileRequest(@RequestParam(value = "name", required = true) String na,
+                                          @RequestParam(value = "flag", required = true) int flag,
+                                          Model model) {
         String filename = new String(Base64.getDecoder().decode(na), StandardCharsets.UTF_8);
         model.addAttribute("filename", filename);
         return "/file/share";
@@ -51,10 +51,10 @@ public class ShareFileController extends BaseController {
     //  文件存放在tempfile目录下
     // demo link http://localhost:7777/sc4u/file/share?name=OTU4Njk3NjZfcDAuanBn&flag=2 Code: 423535
     @PostMapping("/sc4u/file/share")
-    public ResponseEntity<Resource> getShareFile(@RequestParam(value = "name", required = true) String name,
-                                                 @RequestParam(value = "flag", required = true) int flag,
-                                                 @RequestParam(value = "verificationCode", required = true) String verificationCode,
-                                                 Model model) throws FileNotFoundException {
+    public ResponseEntity<Resource> getTempShareFile(@RequestParam(value = "name", required = true) String name,
+                                                     @RequestParam(value = "flag", required = true) int flag,
+                                                     @RequestParam(value = "verificationCode", required = true) String verificationCode,
+                                                     Model model) throws FileNotFoundException {
         String fileName = new String(Base64.getDecoder().decode(name), StandardCharsets.UTF_8);
         // 验证验证码
         String vCode = redisTemplate.opsForValue().get("sf2_" + fileName);

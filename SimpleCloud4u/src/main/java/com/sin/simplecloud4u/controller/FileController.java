@@ -251,8 +251,8 @@ public class FileController extends BaseController {
     // share
     @GetMapping("/user/share/file")
     public String userShareFile() {
+
         return "redirect:/error400Page";
-        //
     }
 
     // 正则验证文件名是否合法 [汉字,字符,数字,下划线,英文句号,横线]
