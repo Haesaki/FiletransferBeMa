@@ -6,6 +6,7 @@ target/
 
 ### Configuration File ###
 /src/main/resources/application-dev.yml
+/src/main/resrouces/*.yml
 
 #### LOG FILE ###
 /log
