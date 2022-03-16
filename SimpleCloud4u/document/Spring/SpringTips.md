@@ -58,10 +58,14 @@
 
 ```java
    public String red(RedirectAttributes attributes){
-           attributes.addFlashAttribute("test","hello");
-           return "redirect:/test/test2";
-           }
+        attributes.addFlashAttribute("test","hello");
+        return"redirect:/test/test2";
+        }
    ```
+
+4. 为什么不推荐field inject，而是通过构造器去注入变量？
+   https://blog.csdn.net/qq_37217713/article/details/117757477
+   https://blog.csdn.net/lilizhou2008/article/details/119337148
 
 ## 其他
 

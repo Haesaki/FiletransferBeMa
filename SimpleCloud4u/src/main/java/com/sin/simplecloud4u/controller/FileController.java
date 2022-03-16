@@ -17,6 +17,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -24,6 +25,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -251,15 +254,19 @@ public class FileController extends BaseController {
     }
 
     // http://localhost:7777/user/getQrCode/?id=0&url=http://localhost:7777/user/sc4u
-    // share
+    // 分享文件
     @GetMapping("/user/share/file")
-    public void userShareFile(@RequestParam(value = "folderPath") String folderPath,
-                              @RequestParam(value = "fileId") Integer fileId,
-                              @RequestParam(value = "fileId") String url,
-                              Model model) {
-        if (folderPath == null || fileId == null || session.getAttribute("user") == null)
-            return;
+    @ResponseBody
+    public Map<String, String> userShareFile(@RequestParam(value = "folderPath") String folderPath,
+                                             @RequestParam(value = "fileId") Integer fileId,
+                                             @RequestParam(value = "remoteURL") String remoteURL,
+                                             Model model) {
+        Map<String, String> ret = new HashMap<>();
+        if (folderPath == null || fileId == null || session.getAttribute("loginUser") == null)
+            return ret;
 
+        if (remoteURL.charAt(remoteURL.length() - 1) != '/')
+            remoteURL = remoteURL + "/";
         File userDirectory = new File(folderPath);
         File userShareFile = null;
         File[] files = userDirectory.listFiles();
@@ -270,24 +277,28 @@ public class FileController extends BaseController {
                 cnt++;
                 if (cnt == fileId) {
                     userShareFile = f;
+                    break;
                 }
             }
         }
         // 判断请求的链接对不对
         if (!userDirectory.exists() || !userDirectory.isDirectory() || userShareFile == null)
-            return;
+            return ret;
         //判断该文件在redis中存不存在， 存在的话就直接放回
-        if (redisTemplate.opsForValue().get("sf1_" + userShareFile.getName()) != null)
-            return;
-
+        if (redisTemplate.opsForValue().get("sf1_" + userShareFile.getName()) != null) {
+            String code = redisTemplate.opsForValue().get("sf1_" + userShareFile.getName());
+            remoteURL = remoteURL + "file/share?name=" + Base64.getEncoder().encodeToString(Objects.requireNonNull(userShareFile.getName()).getBytes(StandardCharsets.UTF_8)) + "&flag=1";
+            ret.put("shareInfo", "url: " + remoteURL + "," + "Code: " + code);
+            return ret;
+        }
         // 将重要信息放到redis里面去记录
         String code = RandomUtil.randomVerificationCode();
         redisTemplate.opsForValue().set("sf1_" + userShareFile.getName(), code, 2, TimeUnit.DAYS);
         redisTemplate.opsForValue().set("sf1_path_" + userShareFile.getName(),
                 folderPath + userShareFile.getName(), 2, TimeUnit.DAYS);
-
-        url = url + "/file/share?name=" + Base64.getEncoder().encodeToString(Objects.requireNonNull(userShareFile.getName()).getBytes(StandardCharsets.UTF_8)) + "&flag=1";
-        model.addAttribute("shareInfo", "url: " + url + "\n\r" + "Code: " + code);
+        remoteURL = remoteURL + "file/share?name=" + Base64.getEncoder().encodeToString(Objects.requireNonNull(userShareFile.getName()).getBytes(StandardCharsets.UTF_8)) + "&flag=1";
+        ret.put("shareInfo", "url: " + remoteURL + "," + "Code: " + code);
+        return ret;
     }
 
     public boolean folderBelong(int userId, String path) {

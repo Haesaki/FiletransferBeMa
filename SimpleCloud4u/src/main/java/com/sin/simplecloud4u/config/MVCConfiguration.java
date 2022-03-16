@@ -67,10 +67,10 @@ public class MVCConfiguration implements WebMvcConfigurer, ErrorPageRegistrar {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new LoginHandlerInterceptor()).addPathPatterns("/**")
                 .excludePathPatterns(
-                        "/", "/file/*", "/error400Page", "/error401Page", "/error404Page", "/error500Page", "/uploadTempFile", "/admin", "/sendCode", "/loginByQQ", "/login", "/register", "/file/share", "/connection",
+                        "/", "/file/*", "/error400Page", "/error401Page", "/error404Page", "/error500Page", "/uploadTempFile", "/sendCode", "/loginByQQ", "/login", "/register", "/file/share", "/connection",
                         "/asserts/**", "/**/*.css", "/**/*.js", "/**/*.png ", "/**/*.jpg",
                         "/**/*.jpeg", "/**/*.gif", "/**/fonts/*", "/**/*.svg",
-                        "/sc4u/file/share");
+                        "/sc4u/file/share", "/user/file/share");
         registry.addInterceptor(new HandlerInterceptor() {
             @Override
             public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {

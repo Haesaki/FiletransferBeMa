@@ -9,6 +9,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,6 +37,7 @@ public class ShareFileController extends BaseController {
     public String getTempShareFileRequest(@RequestParam(value = "name", required = true) String na,
                                           @RequestParam(value = "flag", required = true) int flag,
                                           Model model) {
+        na = na.replaceAll(" ", "+");
         String filename = new String(Base64.getDecoder().decode(na), StandardCharsets.UTF_8);
         model.addAttribute("filename", filename);
         return "/file/share";
@@ -50,20 +52,21 @@ public class ShareFileController extends BaseController {
     //  redis只储存该文件对应的验证码
     //  文件存放在tempfile目录下
     // demo link http://localhost:7777/sc4u/file/share?name=OTU4Njk3NjZfcDAuanBn&flag=2 Code: 423535
-    @PostMapping("/sc4u/file/share")
+    @PostMapping({"/sc4u/file/share"})
     public ResponseEntity<Resource> getTempShareFile(@RequestParam(value = "name", required = true) String name,
                                                      @RequestParam(value = "flag", required = true) int flag,
                                                      @RequestParam(value = "verificationCode", required = true) String verificationCode,
                                                      Model model) throws FileNotFoundException {
         // 最开始是 -> File Name
         // 后面通过赋值，变换成File Path
+        name = name.replaceAll(" ", "+");
         String filePath = new String(Base64.getDecoder().decode(name), StandardCharsets.UTF_8);
         String vCode = "";
         // Register users share file, flag == 1
         // Visitors share file, flag == 2
         if (flag == 1) {
             vCode = redisTemplate.opsForValue().get("sf1_" + filePath);
-            filePath = redisTemplate.opsForValue().get("sf1_path_" + filePath) + filePath;
+            filePath = redisTemplate.opsForValue().get("sf1_path_" + filePath);
         } else if (flag == 2) {
             // 验证验证码
             vCode = redisTemplate.opsForValue().get("sf2_" + filePath);

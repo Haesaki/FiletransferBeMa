@@ -1,0 +1,24 @@
+spring:
+  redis:
+    host: redis-17652.c1.asia-northeast1-1.gce.cloud.redislabs.com
+    password: FpKdpslwly9eeVBre1qOA0vwa8jaXRrf
+    port: 17652
+    database: 0
+  datasource:
+    username: simplecloud4u
+    password: 04d3-4d50-b7f2?i=
+    url: jdbc:mysql://121.41.55.205:3306/simplecloud4u?serverTimezone=Hongkong&useAffectedRows=true
+  # 配置文件上传相关
+  servlet:
+    multipart:
+      max-file-size: 1024MB
+      max-request-size: 1024MB
+  mail:
+    username: qiuxin136@163.com
+    password: JPTOLALIMUBBILHZ
+server:
+  servlet:
+    encoding:
+      force: true
+      charset: UTF-8
+      enabled: true

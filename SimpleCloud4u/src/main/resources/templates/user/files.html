@@ -228,23 +228,29 @@
                 callback: function () {
                     let fileId = $('#tarFile').html();
                     let folderPath = $('#folderPath').html();
-
                     let location = window.location.href;
                     console.log("location: " + location);
                     let strings = location.split("files");
-                    console.log("strings[0]: " + strings[0]);
-                    console.log("strings[1]: " + strings[1]);
-                    console.log(strings[0] + "share/file?folderPath=" + folderPath + "&fileId=" + fileId)
+                    let userstring = strings[0].split("user");
+                    // console.log("strings[0]: " + strings[0]);
+                    // console.log("strings[1]: " + strings[1]);
+                    // console.log(strings[0] + "share/file?folderPath=" + folderPath + "&fileId=" + fileId + "&remoteURL=" + strings[0])
                     $.ajax({
-                        url: strings[0] + "share/file?folderPath=" + folderPath + "&fileId=" + fileId + "&url=" + strings[0],
+                        url: strings[0] + "share/file?folderPath=" + folderPath + "&fileId=" + fileId + "&remoteURL=" + userstring[0] + "sc4u",
                         type: "get",
                         async: false,
                         success: function (data) {
-                            let txt = "<p text=" + data['shareInfo'] + " / > ";
+                            let txt = "<h3 text='" + data['shareInfo'] + "'></h3>";
+                            // <h3 text='url: http://localhost:7777/user//file/share?name=5peg5rOV5b+Y6K6w77yB6L+Z6Ieq5L+h55qE5Zue5aS077yB77yB77yBLmZsdg==&flag=1
+                            //
+                            // Code: 995531'></h3><p text='url: http://localhost:7777/user//file/share?name=5peg5rOV5b+Y6K6w77yB6L+Z6Ieq5L+h55qE5Zue5aS077yB77yB77yBLmZsdg==&flag=1
+                            //
+                            //     Code: 995531'></p>
+                            console.log(data['shareInfo']);
                             let option = {
                                 title: "分享你的文件",
                             };
-                            window.wxc.xcConfirm(txt, "custom", option);
+                            window.wxc.xcConfirm(data['shareInfo'], "custom", option);
                         }
                     });
                 }
