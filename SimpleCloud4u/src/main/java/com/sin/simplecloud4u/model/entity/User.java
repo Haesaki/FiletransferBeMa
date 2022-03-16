@@ -15,6 +15,10 @@ public class User {
 
     private String password;
 
+    private int permission;
+
+    private int size;
+
     // false 普通用户 true admin
     private boolean role;
 

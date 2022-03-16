@@ -6,15 +6,16 @@
           name="viewport">
     <title>Simple Colud 管理用户</title>
 
-    <link rel="stylesheet" href="u-admin/dist/modules/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="u-admin/dist/modules/ionicons/css/ionicons.min.css">
-    <link rel="stylesheet" href="u-admin/dist/modules/fontawesome/web-fonts-with-css/css/fontawesome-all.min.css">
-
-    <link rel="stylesheet" href="u-admin/dist/modules/summernote/summernote-lite.css">
-    <link rel="stylesheet" href="u-admin/dist/modules/flag-icon-css/css/flag-icon.min.css">
-    <link rel="stylesheet" href="u-admin/dist/css/demo.css">
-    <link rel="stylesheet" href="u-admin/dist/css/style.css">
-    <link rel="stylesheet" href="css/zxf_page.css">
+    <link rel="stylesheet" href="../../static/modules/bootstrap/css/bootstrap.min.css"
+          th:href="@{/modules/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" href="../../static/modules/ionicons/css/ionicons.min.css"
+          th:href="@{/modules/ionicons/css/ionicons.min.css}">
+    <link rel="stylesheet" href="../../static/modules/fontawesome/web-fonts-with-css/css/fontawesome-all.min.css"
+          th:href="@{/modules/fontawesome/web-fonts-with-css/css/fontawesome-all.min.css}">
+    <link rel="stylesheet" href="../../static/css/demo.css"
+          th:href="@{/css/demo.css}">
+    <link rel="stylesheet" href="../../static/css/style.css"
+          th:href="@{/css/style.css}">
 </head>
 
 <body>
@@ -22,7 +23,7 @@
     <div class="main-wrapper">
         <div class="navbar-bg"></div>
         <div th:replace="commons/bar::#top"></div>
-        <div th:replace="commons/bar::#sidebar(currUri='manage-users',statistics = ${statistics})"></div>
+        <div th:replace="commons/bar::#sidebar(currUri='manage-users')"></div>
 
         <div class="main-content">
             <section class="section">
@@ -40,30 +41,32 @@
                                             <th>头像</th>
                                             <th>用户名</th>
                                             <th>邮箱</th>
-                                            <th>仓库使用情况</th>
-                                            <th>注册时间</th>
+                                            <!--                                            <th>仓库使用情况</th>-->
+                                            <!--                                            <th>注册时间</th>-->
                                             <th>上传权限</th>
                                             <th>仓库容量(MB)</th>
                                             <th>操作</th>
                                         </tr>
                                         <tr th:each="user:${users}">
-                                            <td th:text="${user.userId}"></td>
+                                            <td th:text="${user.id}"></td>
                                             <td>
-                                                <img alt="image" th:src="${user.imagePath}" class="rounded-circle"
+                                                <img alt="image"
+                                                     src="https://p.qpic.cn/qqconnect/0/app_101851241_1582451550/100?max-age=2592000&t=0"
+                                                     class="rounded-circle"
                                                      width="25" data-toggle="title" title="Wildan Ahdian">
                                             </td>
-                                            <td th:text="${user.userName}"></td>
+                                            <td th:text="${user.name}"></td>
                                             <td th:text="${user.email}"></td>
-                                            <td class="align-middle">
-                                                <div class="progress" style="height: 4px;" data-toggle="tooltip"
-                                                     th:title="${user.current + '%'}">
-                                                    <div class="progress-bar bg-success"
-                                                         th:style="'width:'+ ${user.current + '%'}"></div>
-                                                </div>
-                                            </td>
-                                            <td th:text="${#dates.format(user.registerTime,'yyyy-MM-dd HH:mm')}"></td>
+                                            <!--                                            <td class="align-middle">-->
+                                            <!--                                                <div class="progress" style="height: 4px;" data-toggle="tooltip"-->
+                                            <!--                                                     th:title="${user.current + '%'}">-->
+                                            <!--                                                    <div class="progress-bar bg-success"-->
+                                            <!--                                                         th:style="'width:'+ ${user.current + '%'}"></div>-->
+                                            <!--                                                </div>-->
+                                            <!--                                            </td>-->
+                                            <!--                                            <td th:text="${#dates.format(user.registerTime,'yyyy-MM-dd HH:mm')}"></td>-->
                                             <td>
-                                                <select th:id="${'permission'+user.userId}">
+                                                <select th:id="${'permission'+user.id}">
                                                     <option value="0" th:if="${user.permission == 0}" checked>允许上传下载
                                                     </option>
                                                     <option value="1" th:if="${user.permission == 1}" checked>只允许下载
@@ -76,13 +79,13 @@
                                                 </select>
                                             </td>
                                             <td>
-                                                <input th:id="${'size'+user.userId}" type="number" min="1024"
-                                                       th:value="${user.maxSize/1024}">
+                                                <input th:id="${'size'+user.id}" type="number" min="1024"
+                                                       th:value="${user.size/1024}">
                                             </td>
                                             <td>
-                                                <a th:href="'javaScript:updateStore('+${user.userId}+')'"
+                                                <a th:onclick="'updateUser('+${user.id}+')'"
                                                    class="btn-sm btn-success">更新</a>
-                                                <a th:href="@{/deleteUser(cur=${page.getPageNum()},uId=${user.userId})}"
+                                                <a th:href="@{/deleteUser(cur=0,uId=${user.id})}"
                                                    class="btn-sm btn-danger">删除</a>
                                             </td>
                                         </tr>
@@ -92,71 +95,72 @@
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-12">
-                        <div class="zxf_pagediv"></div>
-                    </div>
-                </div>
-                <div id="pageNum" style="display: none">[[${page.getPages()}]]</div>
-                <div id="current" style="display: none">[[${page.getPageNum()}]]</div>
-                <script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
-                <script type="text/javascript" src="js/zxf_page.js"></script>
-                <script type="text/javascript">
-                    //翻页
-                    $(".zxf_pagediv").createPage({
-                        pageNum: $('#pageNum').html(),
-                        current: $('#current').html(),
-                        backfun: function (e) {
-                            var location = window.location.href;
-                            let strings = location.split("moti-cloud");
-                            console.log(strings[0]);
-                            window.location.href = strings[0] + "moti-cloud/manages-users?cur=" + e['current'];
-                        }
-                    });
-
-                    function updateStore(id) {
-                        var pre = '#permission' + id;
-                        var size = '#size' + id;
-                        if ($(size).val() < 1024) {
-                            alert("仓库容量最小为1024MB！");
-                            return;
-                        }
-                        $.ajax({
-                            type: "GET",
-                            url: "updateStoreInfo",
-                            data: {
-                                "uId": id,
-                                "pre": $(pre).val(),
-                                "size": $(size).val()
-                            },
-                            success: function (data) {
-                                if (data == "200") {
-                                    alert("修改成功！");
-                                }
-                            },
-                            error: function (e) {
-                                console.log(e.responseText);
-                            }
-                        });
-                    }
-                </script>
             </section>
         </div>
         <div th:replace="commons/bar::#footer"></div>
     </div>
 </div>
-<script src="u-admin/dist/modules/jquery.min.js"></script>
-<script src="u-admin/dist/modules/popper.js"></script>
-<script src="u-admin/dist/modules/tooltip.js"></script>
-<script src="u-admin/dist/modules/bootstrap/js/bootstrap.min.js"></script>
-<script src="u-admin/dist/modules/nicescroll/jquery.nicescroll.min.js"></script>
-<script src="u-admin/dist/modules/scroll-up-bar/dist/scroll-up-bar.min.js"></script>
-<script src="u-admin/dist/js/sa-functions.js"></script>
-<script src="u-admin/dist/modules/chart.min.js"></script>
-<script src="u-admin/dist/modules/summernote/summernote-lite.js"></script>
-<script src="u-admin/dist/js/scripts.js"></script>
-<script src="u-admin/dist/js/custom.js"></script>
-<script src="u-admin/dist/js/demo.js"></script>
-<script src="u-admin/dist/modules/chart.min.js"></script>
+<script src="../../static/modules/jquery.min.js"
+        th:src="@{/modules/jquery.min.js}"></script>
+<script>
+    function updateUser(id) {
+        console.log("FUCK JAVASCRIPT" + id);
+
+        var pre = '#permission' + id;
+        var size = '#size' + id;
+        location.href = url;
+        // if ($(size).val() < 1024) {
+        //     alert("仓库容量最小为1024MB！");
+        //     return;
+        // }
+        // $.ajax({
+        //     type: "GET",
+        //     url: "updateStoreInfo",
+        //     data: {
+        //         "uId": id,
+        //         "pre": $(pre).val(),
+        //         "size": $(size).val()
+        //     },
+        //     success: function (data) {
+        //         if (data == "200") {
+        //             alert("修改成功！");
+        //         }
+        //     },
+        //     error: function (e) {
+        //         console.log(e.responseText);
+        //     }
+        // });
+    }
+</script>
+<!--                                                   th:href="'javascript:updateUser(\''+${user.id}+'\')'"-->
+
+<!--                <script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>-->
+<!--                <script th:src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>-->
+<script src="../../static/modules/popper.js"
+        th:src="@{/modules/popper.js}"></script>
+<script src="../../static/modules/tooltip.js"
+        th:src="@{/modules/tooltip.js}"></script>
+<script src="../../static/modules/bootstrap/js/bootstrap.min.js"
+        th:src="@{/modules/bootstrap/js/bootstrap.min.js}"></script>
+<script src="../../static/modules/nicescroll/jquery.nicescroll.min.js"
+        th:src="@{/modules/nicescroll/jquery.nicescroll.min.js}"></script>
+<script src="../../static/modules/scroll-up-bar/dist/scroll-up-bar.min.js"
+        th:src="@{/modules/scroll-up-bar/dist/scroll-up-bar.min.js}"></script>
+<!--<script src="../../static/js/sa-functions.js"-->
+<!--        th:src="@{/js/sa-functions.js}"></script>-->
+
+<!--<script src="../../static/modules/chart.min.js"-->
+<!--        th:src="@{/modules/chart.min.js}"></script>-->
+<!--<script src="../../static/modules/summernote/summernote-lite.js"-->
+<!--        th:src="@{/modules/summernote/summernote-lite.js}"></script>-->
+
+<script src="../../static/js/scripts.js"
+        th:src="@{/js/scripts.js}"></script>
+<script src="../../static/js/custom.js"
+        th:src="@{/js/custom.js}"></script>
+<script src="../../static/js/demo.js"
+        th:src="@{/js/demo.js}"></script>
+<!--<script src="../../static/modules/chart.min.js"-->
+<!--        th:src="@{/modules/chart.min.js}"></script>-->
 </body>
 </html>

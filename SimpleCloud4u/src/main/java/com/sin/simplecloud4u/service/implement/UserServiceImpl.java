@@ -6,6 +6,8 @@ import com.sin.simplecloud4u.service.interfa.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 // authenticate 认证
 // authorize    授权
 @Service
@@ -15,6 +17,16 @@ public class UserServiceImpl implements UserService {
     @Autowired
     public UserServiceImpl(UserMapper userMapper) {
         this.userMapper = userMapper;
+    }
+
+    @Override
+    public List<User> selectAllUser() {
+        return userMapper.selectAllUser();
+    }
+
+    @Override
+    public Integer updatePermissionASize(int id, int permission, int size) {
+        return userMapper.updatePermissionASize(id, permission, size);
     }
 
     @Override

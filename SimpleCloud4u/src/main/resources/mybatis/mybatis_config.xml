@@ -13,7 +13,8 @@
         <setting name="aggressiveLazyLoading" value="false"/>
         <setting name="mapUnderscoreToCamelCase" value="true"/>
     </settings>
-    <plugins>
-        <plugin interceptor="com.github.pagehelper.PageInterceptor"/>
-    </plugins>
+
+    <!--    <plugins>-->
+    <!--        <plugin interceptor="com.github.pagehelper.PageInterceptor"/>-->
+    <!--    </plugins>-->
 </configuration>

@@ -3,6 +3,8 @@ package com.sin.simplecloud4u.mapper;
 import com.sin.simplecloud4u.model.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 @Mapper
 public interface UserMapper {
     // return: 影响行数
@@ -19,4 +21,8 @@ public interface UserMapper {
     User selectUserByName(String name);
 
     User selectUserByEmail(String email);
+
+    List<User> selectAllUser();
+
+    int updatePermissionASize(int id, int permission, int size);
 }

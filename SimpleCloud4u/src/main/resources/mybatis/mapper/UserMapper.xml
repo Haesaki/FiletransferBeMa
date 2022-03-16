@@ -8,6 +8,8 @@
         <result property="email" column="email" jdbcType="VARCHAR"/>
         <result property="password" column="password" jdbcType="VARCHAR"/>
         <result property="role" column="role" jdbcType="TINYINT"/>
+        <result property="permission" column="permission" jdbcType="INTEGER"/>
+        <result property="size" column="size" jdbcType="INTEGER"/>
     </resultMap>
 
     <!--添加语句的字段列表-->
@@ -24,9 +26,16 @@
         <if test="password != null and password != ''">
             password,
         </if>
+        <if test="permission != null">
+            permission,
+        </if>
+        <if test="size != null">
+            size,
+        </if>
     </sql>
 
     <!--添加语句的值列表-->
+
     <sql id="insertValue">
         <if test="id != null and id != ''">
             #{id},
@@ -39,6 +48,12 @@
         </if>
         <if test="password != null and password != ''">
             #{password},
+        </if>
+        <if test="permission != null">
+            permission,
+        </if>
+        <if test="size != null">
+            size,
         </if>
     </sql>
 
@@ -84,4 +99,14 @@
             email = #{email}
         </where>
     </select>
+
+    <select id="selectAllUser" resultType="com.sin.simplecloud4u.model.entity.User">
+        SELECT * FROM user order by id
+    </select>
+
+    <update id="updatePermissionASize">
+        update user
+        set permission=#{permission}, size=#{size}
+        where id = #{id}
+    </update>
 </mapper>
