@@ -1,7 +1,6 @@
 package com.sin.simplecloud4u.controller;
 
 import com.sin.simplecloud4u.model.entity.DirectoryEntity;
-import com.sin.simplecloud4u.model.entity.FileEntity;
 import com.sin.simplecloud4u.model.entity.User;
 import com.sin.simplecloud4u.util.RandomUtil;
 import org.slf4j.Logger;
@@ -18,7 +17,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -26,9 +24,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -109,7 +106,9 @@ public class FileController extends BaseController {
         User loginUser = (User) session.getAttribute("loginUser");
 
         // 如果没有登录 或者不是admin的话，或者创建文件失败，就直接退出
-        if (loginUser == null || !loginUser.getRole() || !allowedToCreateFile(file, uploadFolderPath + file.getOriginalFilename())) {
+        if (loginUser == null || !loginUser.getRole()
+                || !folderBelong(loginUser.getId(), uploadFolderPath)
+                || !allowedToCreateFile(file, uploadFolderPath + file.getOriginalFilename())) {
             model.addAttribute("error", "没有权限 / 创建文件过程存在错误");
             return "redirect:/error404Page";
         }
@@ -127,7 +126,8 @@ public class FileController extends BaseController {
         User loginUser = (User) session.getAttribute("loginUser");
         File downloadFile = new File(folderPath + fileName);
         // 如果没有登录 或者不是admin的话，就直接退出
-        if (loginUser == null || !loginUser.getRole() || !downloadFile.exists()) {
+        if (loginUser == null || !loginUser.getRole() || !downloadFile.exists()
+                || !folderBelong(loginUser.getId(), folderPath)) {
             logger.error("用户没有下载文件的权限!下载失败...");
             return null;
         }
@@ -143,7 +143,8 @@ public class FileController extends BaseController {
         User loginUser = (User) session.getAttribute("loginUser");
         DirectoryEntity homeDirectory = (DirectoryEntity) session.getAttribute("directory");
         // 如果没有登录 或者不是admin的话，或者创建文件失败，就直接退出
-        if (loginUser == null || !loginUser.getRole() || folderId >= homeDirectory.getDirectoryList().size()) {
+        if (loginUser == null || !loginUser.getRole() || folderId >= homeDirectory.getDirectoryList().size()
+                || !folderBelong(loginUser.getId(), homeDirectory.getDirectoryPath())) {
             model.addAttribute("error", "没有权限 / 创建文件过程存在错误");
             return "redirect:/error404Page";
         }
@@ -172,7 +173,8 @@ public class FileController extends BaseController {
     public String deleteFolder(@RequestParam(value = "fId") Integer fId) {
         User loginUser = (User) session.getAttribute("loginUser");
         DirectoryEntity homeDirectory = (DirectoryEntity) session.getAttribute("directory");
-        if (homeDirectory.getDirectoryList().size() <= fId || loginUser == null || !loginUser.getRole())
+        if (homeDirectory.getDirectoryList().size() <= fId || loginUser == null || !loginUser.getRole()
+                || !folderBelong(loginUser.getId(), homeDirectory.getDirectoryPath()))
             return "redirect:/error404Page";
 
         DirectoryEntity subDirectory;
@@ -236,7 +238,8 @@ public class FileController extends BaseController {
     @PostMapping("/user/addFolder")
     public String addFolder(@RequestParam(value = "folderName", required = true) String folderName, @RequestParam(value = "folderPath", required = true) String folderPath, @RequestParam(value = "parentFolderId", required = true) Integer parentFolderId, Model model) {
         User loginUser = (User) session.getAttribute("loginUser");
-        if (loginUser == null || !loginUser.getRole()) return "redirect:/error404Page";
+        if (loginUser == null || !loginUser.getRole() || !folderBelong(loginUser.getId(), folderPath))
+            return "redirect:/error404Page";
 
         File newFolder = new File(folderPath + folderName);
         if (!newFolder.mkdirs()) return "redirect:/error404Page";
@@ -250,9 +253,56 @@ public class FileController extends BaseController {
     // http://localhost:7777/user/getQrCode/?id=0&url=http://localhost:7777/user/sc4u
     // share
     @GetMapping("/user/share/file")
-    public String userShareFile() {
+    public void userShareFile(@RequestParam(value = "folderPath") String folderPath,
+                              @RequestParam(value = "fileId") Integer fileId,
+                              @RequestParam(value = "fileId") String url,
+                              Model model) {
+        if (folderPath == null || fileId == null || session.getAttribute("user") == null)
+            return;
 
-        return "redirect:/error400Page";
+        File userDirectory = new File(folderPath);
+        File userShareFile = null;
+        File[] files = userDirectory.listFiles();
+        int cnt = -1;
+        assert files != null;
+        for (File f : files) {
+            if (f.isFile()) {
+                cnt++;
+                if (cnt == fileId) {
+                    userShareFile = f;
+                }
+            }
+        }
+        // 判断请求的链接对不对
+        if (!userDirectory.exists() || !userDirectory.isDirectory() || userShareFile == null)
+            return;
+        //判断该文件在redis中存不存在， 存在的话就直接放回
+        if (redisTemplate.opsForValue().get("sf1_" + userShareFile.getName()) != null)
+            return;
+
+        // 将重要信息放到redis里面去记录
+        String code = RandomUtil.randomVerificationCode();
+        redisTemplate.opsForValue().set("sf1_" + userShareFile.getName(), code, 2, TimeUnit.DAYS);
+        redisTemplate.opsForValue().set("sf1_path_" + userShareFile.getName(),
+                folderPath + userShareFile.getName(), 2, TimeUnit.DAYS);
+
+        url = url + "/file/share?name=" + Base64.getEncoder().encodeToString(Objects.requireNonNull(userShareFile.getName()).getBytes(StandardCharsets.UTF_8)) + "&flag=1";
+        model.addAttribute("shareInfo", "url: " + url + "\n\r" + "Code: " + code);
+    }
+
+    public boolean folderBelong(int userId, String path) {
+        if (path == null)
+            return false;
+        if (path.length() < fileDirectory.length() || !path.substring(0, fileDirectory.length()).equals(fileDirectory))
+            return false;
+        String userDirectory = path.substring(fileDirectory.length());
+        while (userDirectory.charAt(0) == '/' && userDirectory.length() != 0) {
+            userDirectory = userDirectory.substring(1);
+        }
+        String[] directorys = userDirectory.split("/");
+        if (directorys.length < 1 || !directorys[0].equals(String.valueOf(userId)))
+            return false;
+        return true;
     }
 
     // 正则验证文件名是否合法 [汉字,字符,数字,下划线,英文句号,横线]

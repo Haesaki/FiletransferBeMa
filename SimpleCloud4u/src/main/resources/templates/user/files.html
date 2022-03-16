@@ -230,16 +230,18 @@
                     let folderPath = $('#folderPath').html();
 
                     let location = window.location.href;
+                    console.log("location: " + location);
                     let strings = location.split("files");
-                    console.log("getQrCode/?id=" + $('#tarFile').html() + "&url=" + strings[0] + "sc4u")
+                    console.log("strings[0]: " + strings[0]);
+                    console.log("strings[1]: " + strings[1]);
+                    console.log(strings[0] + "share/file?folderPath=" + folderPath + "&fileId=" + fileId)
                     $.ajax({
-                        url: "strings[0]/share/file?folderPath="+folderPath+"&fileId="+fileId,
+                        url: strings[0] + "share/file?folderPath=" + folderPath + "&fileId=" + fileId + "&url=" + strings[0],
                         type: "get",
                         async: false,
                         success: function (data) {
-                            var txt = "<img src='" + data['  '] + "' style='width: 150px;height: 150px'/><br>" +
-                                "<input style='width: 80%;font-size: 14px' value='" + data['url'] + "'/>";
-                            var option = {
+                            let txt = "<p text=" + data['shareInfo'] + " / > ";
+                            let option = {
                                 title: "分享你的文件",
                             };
                             window.wxc.xcConfirm(txt, "custom", option);

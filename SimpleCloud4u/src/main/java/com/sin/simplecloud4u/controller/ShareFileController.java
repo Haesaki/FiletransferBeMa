@@ -55,10 +55,21 @@ public class ShareFileController extends BaseController {
                                                      @RequestParam(value = "flag", required = true) int flag,
                                                      @RequestParam(value = "verificationCode", required = true) String verificationCode,
                                                      Model model) throws FileNotFoundException {
-        String fileName = new String(Base64.getDecoder().decode(name), StandardCharsets.UTF_8);
-        // 验证验证码
-        String vCode = redisTemplate.opsForValue().get("sf2_" + fileName);
-        String filePath = fileDirectory + tempFilePath + fileName;
+        // 最开始是 -> File Name
+        // 后面通过赋值，变换成File Path
+        String filePath = new String(Base64.getDecoder().decode(name), StandardCharsets.UTF_8);
+        String vCode = "";
+        // Register users share file, flag == 1
+        // Visitors share file, flag == 2
+        if (flag == 1) {
+            vCode = redisTemplate.opsForValue().get("sf1_" + filePath);
+            filePath = redisTemplate.opsForValue().get("sf1_path_" + filePath) + filePath;
+        } else if (flag == 2) {
+            // 验证验证码
+            vCode = redisTemplate.opsForValue().get("sf2_" + filePath);
+            filePath = fileDirectory + tempFilePath + filePath;
+        }
+
         File downloadFile = new File(filePath);
         if (vCode == null || !vCode.equals(verificationCode) || !downloadFile.exists()) {
             // TODO: 禁止IP频繁访问
@@ -66,6 +77,7 @@ public class ShareFileController extends BaseController {
             return null;
         }
         InputStreamResource resource = new InputStreamResource(new FileInputStream(downloadFile));
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + downloadFile.getName() + "\"")
                 .contentLength(downloadFile.length())
