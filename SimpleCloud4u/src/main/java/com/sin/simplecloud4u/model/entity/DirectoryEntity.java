@@ -122,7 +122,7 @@ public class DirectoryEntity {
                     this.fileCount++;
                     files.add(s);
                     long fileSizeB = new File(directoryPath + s).length();
-                    int size = (int) (fileSizeB / 1024);
+                    int size = (int) (fileSizeB);
                     fileSize.add(size);
                     root.insert(s, directoryPath + s);
                 }

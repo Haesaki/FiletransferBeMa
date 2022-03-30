@@ -111,7 +111,8 @@ public class FileController extends BaseController {
         // 如果没有登录 或者不是admin的话，或者创建文件失败，就直接退出
         if (loginUser == null || !loginUser.getRole()
                 || !folderBelong(loginUser.getId(), uploadFolderPath)
-                || !allowedToCreateFile(file, uploadFolderPath + file.getOriginalFilename())) {
+                || !allowedToCreateFile(file, uploadFolderPath + file.getOriginalFilename())
+                || file.getSize() > REGISTERED_STORAGE_MAX_SIZE) {
             model.addAttribute("error", "没有权限 / 创建文件过程存在错误");
             return "redirect:/error404Page";
         }

@@ -2,6 +2,7 @@ package com.sin.simplecloud4u.controller;
 
 import com.sin.simplecloud4u.model.entity.*;
 import com.sin.simplecloud4u.util.FileUtil;
+import com.sin.simplecloud4u.util.GenerateFileStatistics;
 import org.apache.tomcat.jni.Directory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -25,11 +26,8 @@ public class IndexController extends BaseController {
             return "/";
 
         DirectoryEntity directory = (DirectoryEntity) session.getAttribute("directory");
-
-        FileStatistics fileStatistics = new FileStatistics();
-        fileStatistics.MAX_SIZE = REGISTERED_STORAGE_MAX_SIZE;
-        fileStatistics.fileCount = directory.getFileCount();
-        fileStatistics.folderCount = directory.getDirectoryCount();
+        FileStatistics fileStatistics = GenerateFileStatistics.scanHomeDirectory(directory);
+        fileStatistics.MAX_SIZE  = REGISTERED_STORAGE_MAX_SIZE;
 
         map.put("statistics", fileStatistics);
 

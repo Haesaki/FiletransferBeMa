@@ -65,21 +65,18 @@
                             </div>
                         </div>
                         <div class="row">
+                            <!--                            <div class="col-lg-6 col-md-6 col-12">-->
+                            <!--                                <div class="card">-->
+                            <!--                                    <div class="card-header">-->
+                            <!--                                        <h4>文件明细情况</h4>-->
+                            <!--                                    </div>-->
+                            <!--                                    <div class="card-body">-->
+                            <!--                                        <canvas id="myChart"></canvas>-->
+                            <!--                                    </div>-->
+                            <!--                                </div>-->
+                            <!--                            </div>-->
                             <div class="col-lg-6 col-md-6 col-12">
                                 <div class="card">
-                                    <div class="card-header">
-                                        <h4>文件明细情况</h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <canvas id="myChart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h4>已使用/剩余容量（当前最大容量：[[${MAX_FILE_SIZE/(1024)}]]MB）</h4>
-                                    </div>
                                     <div class="card-body">
                                         <canvas id="myChart1"></canvas>
                                     </div>
@@ -130,42 +127,42 @@
 <script src="../../static/modules/chart.min.js"
         th:src="@{/modules/chart.min.js}"></script>
 <script>
-    const chartContext1 = document.getElementById("myChart").getContext('2d');
-    const myChart = new Chart(chartContext1, {
-        type: 'doughnut',
-        data: {
-            datasets: [{
-                data: [
-                    [[${statistics.doc}]],
-                    [[${statistics.image}]],
-                    [[${statistics.video}]],
-                    [[${statistics.music}]],
-                    [[${statistics.other}]],
-                ],
-                backgroundColor: [
-                    '#3498db',
-                    '#28a745',
-                    '#ffc107',
-                    '#dc3545',
-                    '#343a40',
-                ],
-                label: 'Dataset 1'
-            }],
-            labels: [
-                '文档',
-                '图像',
-                '视频',
-                '音乐',
-                '其他'
-            ],
-        },
-        options: {
-            responsive: true,
-            legend: {
-                position: 'bottom',
-            },
-        }
-    });
+    // const chartContext1 = document.getElementById("myChart").getContext('2d');
+    // const myChart = new Chart(chartContext1, {
+    //     type: 'doughnut',
+    //     data: {
+    //         datasets: [{
+    //             data: [
+    //                 [[${statistics.doc}]],
+    //                 [[${statistics.image}]],
+    //                 [[${statistics.video}]],
+    //                 [[${statistics.music}]],
+    //                 [[${statistics.other}]],
+    //             ],
+    //             backgroundColor: [
+    //                 '#3498db',
+    //                 '#28a745',
+    //                 '#ffc107',
+    //                 '#dc3545',
+    //                 '#343a40',
+    //             ],
+    //             label: 'Dataset 1'
+    //         }],
+    //         labels: [
+    //             '文档',
+    //             '图像',
+    //             '视频',
+    //             '音乐',
+    //             '其他'
+    //         ],
+    //     },
+    //     options: {
+    //         responsive: true,
+    //         legend: {
+    //             position: 'bottom',
+    //         },
+    //     }
+    // });
 
 </script>
 <script>
@@ -175,8 +172,8 @@
         data: {
             datasets: [{
                 data: [
-                    [[${statistics.currentSize/(1024 * 1024)}]],
-                    [[${(statistics.MAX_SIZE)/(1024 * 1024)}]],
+                    [[${statistics.currentSize/1048567}]],
+                    [[${(statistics.MAX_SIZE - statistics.currentSize)/1048567}]],
                 ],
                 backgroundColor: [
                     '#223e36',
