@@ -13,14 +13,14 @@ public class DirectoryEntityTest {
     }
 
     public void iteratorOutputFileTree(DirectoryEntity directoryEntity, int cnt) {
-        if (directoryEntity.getSubDirectory() != null)
-            for (DirectoryEntity subDirectory : directoryEntity.getSubDirectory()) {
-                iteratorOutputFileTree(subDirectory, cnt + 1);
-            }
-        String prefix = " ".repeat(cnt);
-        if (directoryEntity.getFiles() != null)
-            for (String s : directoryEntity.getFiles()) {
-                System.out.println(prefix + s);
-            }
+//        if (directoryEntity.getSubDirectory() != null)
+//            for (DirectoryEntity subDirectory : directoryEntity.getSubDirectory()) {
+//                iteratorOutputFileTree(subDirectory, cnt + 1);
+//            }
+//        String prefix = " ".repeat(cnt);
+//        if (directoryEntity.getFiles() != null)
+//            for (String s : directoryEntity.getFiles()) {
+//                System.out.println(prefix + s);
+//            }
     }
 }

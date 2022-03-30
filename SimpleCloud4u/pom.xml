@@ -14,7 +14,6 @@
     <name>SimpleCloud4u</name>
     <description>SimpleCloud4u</description>
     <properties>
-        <java.version>11</java.version>
     </properties>
 
     <repositories>
